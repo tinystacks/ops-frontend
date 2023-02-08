@@ -9,9 +9,9 @@ export default function Home() {
         <div>
           <h1>{t('home.title')}</h1>
         </div>
-        <div>
-          <Console />
-        </div>
+        <Console
+          pageContents={<div></div>}
+        />
       </main>
     </>
   );

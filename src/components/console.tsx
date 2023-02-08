@@ -1,49 +1,58 @@
-import { addPage, selectPages, updatePage } from 'ops-frontend/store/consoleSlice';
-import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
+import { selectPages } from 'ops-frontend/store/consoleSlice';
+import React, { ReactNode } from 'react';
+import { useAppSelector } from 'ops-frontend/store/hooks';
 
-export function Console() {
+// The Console component is a wrapper around a Page
+// It currently includes the console-level header and left-nav 
+
+export function Console(props: { pageContents: ReactNode }) {
+  const { pageContents } = props;
   const pages = useAppSelector(selectPages);
-  const dispatch = useAppDispatch();
-  const [pageText, setPageText] = useState('updated');
 
-  function renderPages() {
-    const pagesRender = pages.map((p: string, index: number) => {
-      return (
-        <div key={`page${index}`}>
-          {p}
-        </div>
-      );
-    });
-
+  
+  function renderHeader() {
     return (
-      <div data-testid='pages-panel'>
-        {pagesRender}
+      <>
+        {renderBreadcrumbs()}
+        <div>
+          {/* TODO use dashboard name */}
+          <h1>Dashboard</h1>
+          {/* TODO: ACTIONS */}
+          <button>
+            Dashboard Settings
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  function renderBreadcrumbs() {
+    return (
+      <div>
+        TODO
+      </div>
+    );
+  }
+
+  function renderLeftNav() {
+    return (
+      <div data-testid='console-left-nav'>
+        {Object.keys(pages).map((page: string) => (
+          <div key={page} data-testid='console-left-nav-item'>
+            {page}
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
     <div>
-      Hello
-      <div>
-        <button
-            data-testid='add-page'
-            onClick={() => dispatch(addPage('new page'))}
-          >
-            +
-        </button>
-        <button
-            onClick={() => dispatch(updatePage({page: pageText, index: 0}))}
-          >
-            ~
-        </button>
-        <input
-            value={pageText}
-            onChange={e => setPageText(e.target.value)}
-          />
-        </div>
-        <div>Pages: {renderPages()}</div>
+      {renderHeader()}
+      {renderLeftNav()}
+      <div data-testid='console-page-contents'>
+        {pageContents}
+      </div>
     </div>
   );
 }

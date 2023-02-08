@@ -22,6 +22,7 @@ const customJestConfig = {
     'ops-frontend/(.*)$': '<rootDir>/src/$1',
     'ops-frontend-test/(.*)$': '<rootDir>/__tests__/$1'
   },
+  resolver: undefined,
   testPathIgnorePatterns: ['<rootDir>/__tests__/test-utils'],
   testEnvironment: 'jest-environment-jsdom',
   collectCoverage: true,
