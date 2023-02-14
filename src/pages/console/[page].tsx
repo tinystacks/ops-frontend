@@ -101,7 +101,6 @@ export async function fetchWidgetData(consoleName: string, pageWidgets: Widget[]
       .catch(e => e);
 
       let renderWidget: Widget;
-      // TODO: change this to single Widget instead of list
       if (fetchedWidget instanceof Widget) {
         renderWidget = fetchedWidget;
       } else {

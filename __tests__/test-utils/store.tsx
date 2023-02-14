@@ -1,7 +1,6 @@
 import React, { PropsWithChildren } from 'react'
 import { render } from '@testing-library/react'
 import type { RenderOptions } from '@testing-library/react'
-import { configureStore } from '@reduxjs/toolkit'
 import { Provider } from 'react-redux'
 import type { PreloadedState } from '@reduxjs/toolkit';
 import type { RootStore, RootState } from 'ops-frontend/store/store'

@@ -14,8 +14,8 @@ interface ConsoleState {
   pageContextWidgets: { [id: string]: Widget };
 };
 
-// TODO: Function for getting the console from API, make this empty states
 export const consoleInitialState: ConsoleState = {
+  // TODO: when we do console stuff, empty state this guy
   name: 'console',
   pages: {},
   widgets: {},
@@ -90,7 +90,6 @@ export function selectPageWidgets(pageId: string) {
       } else if (widgets[widgetId]) {
         widgetStateMap[widgetId] = new LoadingWidget(widgetId, widgetId, 'LoadingWidget', '');
       } else {
-        // todo - swap this block with stuff from parser
         try {
           const parsedWidget = WidgetParser.parse(widgets[widgetId]);
           widgetStateMap[widgetId] = (parsedWidget);
