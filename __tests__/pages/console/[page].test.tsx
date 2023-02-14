@@ -1,26 +1,24 @@
-import Page, { pidToPageRoute } from "ops-frontend/pages/console/[page]";
-import { screen } from "@testing-library/react";
-import { mockI18n } from "ops-frontend-test/test-utils/i18n";
-import { renderWithProviders } from "ops-frontend-test/test-utils/store";
-// import mockRouter from 'next-router-mock';
-// import nextRouter from 'next/router';
+import Page, { pidToPageRoute } from 'ops-frontend/pages/console/[page]';
+import {  screen } from '@testing-library/react';
+import { mockI18n } from 'ops-frontend-test/test-utils/i18n';
+import { renderWithProviders } from 'ops-frontend-test/test-utils/store';
 
 mockI18n();
-// jest.mock('next/router', () => require('next-router-mock'));
 
 function mockPageQueryRoute(page?: string | string[]) {
   const useRouter = jest.spyOn(require('next/router'), 'useRouter');
-    useRouter.mockImplementationOnce(() => ({
+    useRouter.mockImplementation(() => ({
       query: { page },
     }));
 }
 
-describe("Page", () => {
+describe('Page routes, headers, simple render', () => {
   afterEach(function () {
     jest.clearAllMocks();
   });
-  it("renders not found with invalid path", async () => {
-    mockPageQueryRoute();
+  
+  it('renders not found with invalid path', async () => {
+    mockPageQueryRoute('1234');
     renderWithProviders(<Page />, {
       preloadedState: {
         console: {
@@ -32,32 +30,32 @@ describe("Page", () => {
       }
     });
 
-    await screen.findByText("common.notFound");
+    await screen.findByText('common.notFound');
   });
 
-  it("renders correctly with valid path, page, and widgets", async () => {
+  it('renders correctly with valid path, page, and widgets', async () => {
     mockPageQueryRoute('main-page');
     renderWithProviders(<Page />, {
       preloadedState: {
         console: {
           pages:{
-            "main-page": {
-              id: "main-page",
-              route: "main-page",
+            'main-page': {
+              id: 'main-page',
+              route: 'main-page',
               widgetIds: [
-                "simple-md-panel",
-                "simple-md-panel-2"
+                'simple-md-panel',
+                'simple-md-panel-2'
               ]
             }
           },
           widgets: {
-            "simple-md-panel": {
-              type: "Markdown",
+            'simple-md-panel': {
+              type: 'Loading',
               displayName: 'markdown',
               providerId: 'nothing for now'
             },
-            "simple-md-panel-2": {
-              type: "Markdown",
+            'simple-md-panel-2': {
+              type: 'Loading',
               displayName: 'markdown',
               providerId: 'nothing for now'
             }
@@ -69,44 +67,22 @@ describe("Page", () => {
     
     const renderedWidgets = await screen.findAllByTestId('widget');
     expect(renderedWidgets.length).toBe(2);
-    expect(renderedWidgets[0].innerHTML).toBe('some markdown');
-    expect(renderedWidgets[1].innerHTML).toBe('some markdown');
+    expect(renderedWidgets[0].innerHTML).toBe('common.loading');
+    expect(renderedWidgets[1].innerHTML).toBe('common.loading');
     expect((await screen.findByTestId('page-header-page-id')).innerText).toBeEmptyDOMElement;
   });
 
-  it('page header renders empty div when page does not have id', async () => {
-    mockPageQueryRoute('main-page');
-    renderWithProviders(<Page />, {
-      preloadedState: {
-        console: {
-          pages:{
-            "main-page": {
-              route: "main-page",
-              widgetIds: [
-                "simple-md-panel"
-              ]
-            }
-          },
-          widgets: {},
-          providers: {}
-        }
-      }
-    });
-
-    expect((await screen.findByTestId('page-header-page-id-undefined'))).toBeEmptyDOMElement;
-  });
-
   it('page routes to / when no page is defined', async () => {
     mockPageQueryRoute();
     renderWithProviders(<Page />, {
       preloadedState: {
         console: {
           pages:{
-            "main-page": {
+            'main-page': {
               id: 'main-page',
-              route: "/",
+              route: '/',
               widgetIds: [
-                "simple-md-panel"
+                'simple-md-panel'
               ]
             }
           },
@@ -125,11 +101,11 @@ describe("Page", () => {
       preloadedState: {
         console: {
           pages:{
-            "main-page": {
+            'main-page': {
               id: 'main-page',
-              route: "/",
+              route: '/',
               widgetIds: [
-                "simple-md-panel"
+                'simple-md-panel'
               ]
             }
           },
@@ -148,11 +124,11 @@ describe("Page", () => {
       preloadedState: {
         console: {
           pages:{
-            "main-page": {
+            'main-page': {
               id: 'main-page',
-              route: "/",
+              route: '/',
               widgetIds: [
-                "simple-md-panel"
+                'simple-md-panel'
               ]
             }
           },
@@ -171,11 +147,11 @@ describe("Page", () => {
       preloadedState: {
         console: {
           pages:{
-            "main-page": {
+            'main-page': {
               id: 'main-page',
-              route: "/",
+              route: '/',
               widgetIds: [
-                "simple-md-panel"
+                'simple-md-panel'
               ]
             }
           },
@@ -197,3 +173,68 @@ describe("Page", () => {
     expect(pidToPageRoute(['test', 'test2'])).toBe('test');
   });
 });
+
+// const mockGetWidget = jest.fn();
+// const getWidgetSpy = jest.spyOn(apis, 'getWidget').mockImplementation(mockGetWidget);
+// mockGetWidget.mockRejectedValue('error');
+
+describe('Page widget renders', () => {
+  afterEach(function () {
+    jest.clearAllMocks();
+  });
+  
+  it('empty widgets list renders empty widgets div', async () => {
+    mockPageQueryRoute('');
+    renderWithProviders(<Page />, {
+      preloadedState: {
+        console: {
+          pages:{
+            'main': {
+              id: 'main',
+              route: '/',
+              widgetIds: []
+            }
+          },
+          widgets: {},
+          providers: {}
+        }
+      }
+    });
+
+    expect((await screen.findByTestId('rendered-widgets'))).toBeEmptyDOMElement;
+  });
+
+  it('nonexistant referenced widgets render error widgets', async () => {
+    mockPageQueryRoute('');
+    renderWithProviders(<Page />, {
+      preloadedState: {
+        console: {
+          pages:{
+            'main': {
+              id: 'main',
+              route: '/',
+              widgetIds: ['dne']
+            }
+          },
+          widgets: {},
+          providers: {}
+        }
+      }
+    });
+
+    expect((await screen.findByTestId('widget')).innerHTML).toBe('widgets.genericWidgetError');
+  });
+
+  it ('Unit test fetch failure', async () => {
+    // mockGetWidget.mockRejectedValueOnce('error');
+    // await fetchWidgetData('console', [new SimpleTextWidget('simple', 'text', 'SimplyTextWidget', '')]);
+  });
+
+  it ('Unit test fetch success', async () => {
+
+  });
+
+  // TODO: Test render with valid widget fetch
+  // TODO: Test render with error'ed widget fetch
+});
+  

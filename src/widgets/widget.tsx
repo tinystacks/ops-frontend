@@ -27,22 +27,27 @@ abstract class Widget implements WidgetType {
     this.showDescription = showDescription; 
   }
 
-  /**
-   * Override this to accept a json object that overlaps with your class's interface and returns an instance of itself.
-   */
-  static fromJson (_object: WidgetType) {
-    throw new Error('Method not implemented.');
+  static fromJson(_object: WidgetType): Widget {
+    throw new Error('Implement in child!');
   }
 
-  /**
-   * Implement this method to return only public properties.
-   * Filter out things like functions, private properties, etc.
-   */
-  abstract toJson (): WidgetType;
+  toJson(): WidgetType {
+    return {
+      id: this.id,
+      displayName: this.displayName,
+      type: this.type,
+      providerId: this.providerId,
+      showDisplayName: this.showDisplayName,
+      description: this.description,
+      showDescription: this.showDescription
+    };
+  };
 
-  public abstract render (): JSX.Element;
+  public abstract render(): JSX.Element;
   
-  public abstract getData (): void;
+  public getData (): void {
+    throw new Error('Not necessary in the frontend.')
+  };
 }
 
 export default Widget;

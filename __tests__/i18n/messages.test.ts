@@ -6,9 +6,9 @@ describe('messages', () => {
   })
 
   it('all locales implement the same message objects', () => {
-    const langMessageKeys: Set<string>[] = Object.keys(messages).map((lang: string, index: number) => {
+    const langMessageKeys: Set<string>[] = Object.keys(messages).map((lang: string) => {
       const messageKeys = new Set<string>();
-      getLeafKeys(messages[lang], messageKeys, "");
+      getLeafKeys(messages[lang], messageKeys, '');
       return messageKeys;
     });
 
@@ -24,7 +24,7 @@ function getLeafKeys(localeMessages: LocaleMessageType, messageKeys: Set<string>
     if (terminalValueTypes.has(typeof val)) {
       messageKeys.add(prefix + key);
     } else {
-      getLeafKeys(val as LocaleMessageType, messageKeys, key + ".");
+      getLeafKeys(val as LocaleMessageType, messageKeys, key + '.');
     }
   })
 }

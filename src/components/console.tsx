@@ -1,25 +1,47 @@
-import { selectPages } from 'ops-frontend/store/consoleSlice';
-import React, { ReactNode } from 'react';
-import { useAppSelector } from 'ops-frontend/store/hooks';
+import { selectPages, updateConsole } from 'ops-frontend/store/consoleSlice';
+import React, { ReactNode, useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
+import apis from 'ops-frontend/utils/apis';
+import { useTranslation } from 'react-i18next';
 
 // The Console component is a wrapper around a Page
 // It currently includes the console-level header and left-nav 
 
 export function Console(props: { pageContents: ReactNode }) {
   const { pageContents } = props;
+  const { t } = useTranslation();
   const pages = useAppSelector(selectPages);
 
-  
+
+  // TODO: Change this from a component to a page, make it part of our route
+  // const consoleName = useAppSelector(selectConsoleName);
+  const dispatch = useAppDispatch();
+  useEffect(function () {
+    async function fetchData() {
+      try {
+        const consoles = await apis.getConsoles();
+        if (Array.isArray(consoles)) {
+          // FIXME: when we change this to a page.
+          // @ts-ignore
+          dispatch(updateConsole(consoles.find(c => c.name === 'console')));
+        }
+      } catch (e) {
+
+      }
+    }
+    void fetchData();
+  });
+
   function renderHeader() {
     return (
       <>
         {renderBreadcrumbs()}
         <div>
-          {/* TODO use dashboard name */}
+          {/* TODO: use dashboard name */}
           <h1>Dashboard</h1>
           {/* TODO: ACTIONS */}
           <button>
-            Dashboard Settings
+            {t('common.settings')}
           </button>
         </div>
       </>

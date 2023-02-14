@@ -1,5 +1,5 @@
 import { Console } from 'ops-frontend/components/console';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { mockI18n } from 'ops-frontend-test/test-utils/i18n';
 import { renderWithProviders } from 'ops-frontend-test/test-utils/store';
 

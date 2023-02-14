@@ -33,6 +33,10 @@
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
+    "max-len": ["warn", {
+      "code": 120
+    }],
+    "quotes": ["error", "single"],
     "unused-imports/no-unused-vars": [
       "error",
       {
