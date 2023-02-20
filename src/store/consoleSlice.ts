@@ -1,17 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Console, Page, Provider, Widget } from '@tinystacks/ops-model';
-import FrontendWidget from 'ops-frontend/widgets/widget';
+import { WidgetParser as FrontendWidget } from '@tinystacks/ops-core';
 import { RootState } from 'ops-frontend/store/store';
 import ErrorWidget from 'ops-frontend/widgets/errorWidget';
-import LoadingWidget from 'ops-frontend/widgets/loadingWidget';
-import { WidgetParser } from '@tinystacks/ops-core';
-
+import { Markdown, Tabs } from '@tinystacks/ops-core-widgets';
 interface ConsoleState {
   name: string;
   pages: Record<string, Page>;
   widgets: Record<string, Widget>;
   providers: Record<string, Provider>;
-  pageContextWidgets: { [id: string]: Widget };
+  dependencies: { [id: string]: string };
 };
 
 export const consoleInitialState: ConsoleState = {
@@ -20,7 +18,7 @@ export const consoleInitialState: ConsoleState = {
   pages: {},
   widgets: {},
   providers: {},
-  pageContextWidgets: {}
+  dependencies: {}
 };
 
 
@@ -50,7 +48,7 @@ export const consoleSlice = createSlice({
         pages: payload.pages,
         widgets: payload.widgets,
         providers: payload.providers,
-        pageContextWidgets: {}
+        dependencies: { ...payload.dependencies }
       };
     }
   }
@@ -80,23 +78,41 @@ export function selectPageWidgets(pageId: string) {
     const { pages, widgets } = state.console;
     const page: Page = pages[pageId];
     if (!page) {
-      return [new ErrorWidget('page', 'page', 'ErrorWidget', '')];
+      // return [new ErrorWidget('page', 'page', 'ErrorWidget', '')];
+      return [];
     }
 
     const widgetStateMap: { [id: string]: FrontendWidget} = {};
     page.widgetIds.forEach((widgetId: string) => {
-      if (!widgets[widgetId]) {
+      const w = widgets[widgetId];
+      const { id, displayName } = w; 
+      if (!w) {
         widgetStateMap[widgetId] = new ErrorWidget(widgetId, widgetId, 'ErrorWidget', '');
-      } else if (widgets[widgetId]) {
-        widgetStateMap[widgetId] = new LoadingWidget(widgetId, widgetId, 'LoadingWidget', '');
       } else {
-        try {
-          const parsedWidget = WidgetParser.parse(widgets[widgetId]);
-          widgetStateMap[widgetId] = (parsedWidget);
+        switch (w.type) {
+          case 'Tabs':
+            widgetStateMap[widgetId] = Tabs.fromJson(w);
+            break;
+          case 'Markdown':
+            widgetStateMap[widgetId] = Markdown.fromJson(w);
+            break;
+          default:
+             widgetStateMap[widgetId] = ErrorWidget.fromJson({
+                id,
+                type: 'ErrorWidget',
+                providerId: '',
+                displayName
+             });
         }
-        catch (e) {
-          widgetStateMap[widgetId] = new ErrorWidget(widgetId, widgetId, 'ErrorWidget', '');;
-        }
+        // TODO: SWAP TO THIS WHEN I CAN GET IT WORKING
+        // try {
+          // const WidgetTNow = __non_webpack_require__(dependencies[w.type])
+          // widgetStateMap[widgetId] = WidgetTNow.fromJson(w);
+          // widgetStateMap[widgetId] = WidgetParser.fromJson(w, dependencies[w.type]);
+        // }
+        // catch (e) { 
+          // widgetStateMap[widgetId] = new ErrorWidget(widgetId, widgetId, 'ErrorWidget', '');;
+        // }
       }
     });
 
@@ -109,34 +125,6 @@ export function selectConsoleState(state: RootState): FrontendWidget[] {
 
 export function selectConsoleName(state: RootState): string {
   return state.console.name;
-}
-
-// accepts a pagename as action payload
-// 1. use the primary widget set from the console-level (yml) config
-// 2. Seed the page-level widgets state with loading items
-export function populateWidgetsFromPage (
-  state: ConsoleState, action: PayloadAction<string>
-): { [id: string]: Widget } {
-
-  const { pages, widgets } = state;
-  const page = Object.values(pages).find(page => page.id === action.payload);
-  if (!page) {
-    return { errorWidget: new ErrorWidget('page', 'page', 'ErrorWidget', '') };
-  }
-
-  const widgetStateMap: { [id: string]: Widget} = {};
-  page.widgetIds.forEach((widgetId: string) => {
-    const widget = widgets[widgetId];
-    if (!widget) {
-      widgetStateMap[widgetId] = new ErrorWidget(widgetId, widgetId, 'ErrorWidget', '').toJson();
-    } else if (!(widget instanceof FrontendWidget)) {
-      widgetStateMap[widgetId] = new LoadingWidget(widgetId, widgetId, 'LoadingWidget', '').toJson();
-    } else {
-      widgetStateMap[widgetId] = widget;
-    }
-  });
-
-  return widgetStateMap;
 }
 
 export default consoleSlice.reducer;

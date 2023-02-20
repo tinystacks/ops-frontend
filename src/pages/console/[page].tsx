@@ -6,18 +6,22 @@ import {
 } from 'ops-frontend/store/consoleSlice';
 import { useAppSelector } from 'ops-frontend/store/hooks';
 import isEmpty from 'lodash.isempty';
-import Widget from 'ops-frontend/widgets/widget';
+import { WidgetParser as Widget } from '@tinystacks/ops-core';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
 import ErrorWidget from 'ops-frontend/widgets/errorWidget';
 import apis from 'ops-frontend/utils/apis';
+import { Box, Flex, Heading } from '@chakra-ui/react';
+import { FullpageLayout } from 'ops-frontend/components/fullpage-layout';
+// import { Widget as WidgetType } from '@tinystacks/ops-model';
+// import { WidgetParser } from '@tinystacks/ops-core';
 
 // A page consists of
 // 1. A page-level header with the page title and actions
 // 2. A rendered-out list of widgets
-const Page = () => {
+function Page() {
   const { t } = useTranslation();
   const router = useRouter();
   const { page: pid } = router.query;
@@ -31,47 +35,46 @@ const Page = () => {
   const previousPageWidgets = usePreviousValue(pageWidgets);
 
   useEffect(() => {
-    if (!previousPageWidgets && pageWidgets) {
+    if ((!previousPageWidgets || isEmpty(Object.keys(previousPageWidgets))) 
+    && pageWidgets && !isEmpty(Object.keys(pageWidgets))) {
       void fetchWidgetData(consoleName, pageWidgets, dispatch);
     }
   });
 
   function renderPage() {
     if (!page) {
-      return <>{t('common.notFound')}</>;
+      return <FullpageLayout>{t('common.notFound')}</FullpageLayout>;
     }
 
     return (
-      <div>
-        {renderPageHeader()}
-        {renderPageWidgets()}
-      </div>
+      <>{renderPageWidgets()}</>
     );
   }
 
-  function renderPageHeader() {
-    return <div data-testid='page-header-page-id'>{page.id}</div>;
-  }
-
   function renderPageWidgets() {
-    let widgetsRender = [<></>];
+    let widgetsRender = <></>;
     if (!isEmpty(pageWidgets)) {
       widgetsRender = pageWidgets.map((w: Widget) => {
         return (
-          <div data-testid='widget' key={w.id}>{w.render()}</div>
+          <Box data-testid='widget' key={w.id}>
+            <Flex className='widgetHeader'>
+              <Heading as='h4' size='md'>{w.id}</Heading>
+            </Flex>
+            <Flex className='widgetBody'>
+              {w.render()}
+              {/* {w.render()} */}
+            </Flex>
+          </Box>
         );
       });
     }
-
-    return <div data-testid='rendered-widgets'>{widgetsRender}</div>;
+    return <div>{widgetsRender}</div>;
   }
 
   return (
-    <Console pageContents={(
-      <div>
-        <div>{renderPage()}</div>
-      </div>
-    )} />
+      <Console pageContents={(
+          <>{renderPage()}</>
+      )} />
   )
 }
 
@@ -97,17 +100,19 @@ export async function fetchWidgetData(consoleName: string, pageWidgets: Widget[]
     // We want this to be synchronous so that we're not overwriting state inconsistently
     // Later, we can batch requests + writes to state for better performance
     for (let widget of pageWidgets) {
-      const fetchedWidget = await apis.getWidget(consoleName, widget.id)
+      const { id = '', displayName, providerId } = widget;
+      const fetchedWidget = await apis.getWidget(consoleName, id)
       .catch(e => e);
 
       let renderWidget: Widget;
-      if (fetchedWidget instanceof Widget) {
+      // Widget type check
+      if (fetchedWidget.type && fetchedWidget.id && fetchedWidget.displayName) {
         renderWidget = fetchedWidget;
       } else {
-        renderWidget = new ErrorWidget(widget.id, fetchedWidget.toString() || '', widget.type, '');        
+        renderWidget = ErrorWidget.fromJson({ id, displayName, type: 'ErrorWidget', providerId });
       }
 
-      dispatch(updatePageWidget(renderWidget.toJson()));
+      dispatch(updatePageWidget(renderWidget));
     }
   }
 }

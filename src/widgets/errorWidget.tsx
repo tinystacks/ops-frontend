@@ -1,7 +1,8 @@
 import React from 'react';
-import Widget from 'ops-frontend/widgets/widget';
+import { WidgetParser as Widget } from '@tinystacks/ops-core';
 import { useTranslation } from 'react-i18next';
 import { Widget as WidgetType} from '@tinystacks/ops-model';
+
 class ErrorWidget extends Widget {
   render(): JSX.Element {
     const id = this.id;
@@ -15,7 +16,7 @@ class ErrorWidget extends Widget {
 
   static fromJson(w: WidgetType): ErrorWidget {
     return new ErrorWidget(
-      w.id || '', w.displayName, w.type, w.providerId, w.showDisplayName, w.description, w.showDescription
+      w.type, w.displayName, w.providerId, w.showDisplayName, w.description, w.showDescription, w.id || ''
     );
   }
 }
