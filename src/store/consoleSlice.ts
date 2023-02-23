@@ -2,8 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Console, Page, Provider, Widget } from '@tinystacks/ops-model';
 import { WidgetParser as FrontendWidget } from '@tinystacks/ops-core';
 import { RootState } from 'ops-frontend/store/store';
-import ErrorWidget from 'ops-frontend/widgets/errorWidget';
-import { Markdown, Tabs } from '@tinystacks/ops-core-widgets';
+
 interface ConsoleState {
   name: string;
   pages: Record<string, Page>;
@@ -74,53 +73,22 @@ export function selectPage(pageId: string) {
 }
 
 export function selectPageWidgets(pageId: string) {
-  return function (state: RootState): FrontendWidget[] {
+  return function (state: RootState): Widget[] {
     const { pages, widgets } = state.console;
     const page: Page = pages[pageId];
-    if (!page) {
-      // return [new ErrorWidget('page', 'page', 'ErrorWidget', '')];
+    if (!page || !page.widgetIds) {
       return [];
     }
-
-    const widgetStateMap: { [id: string]: FrontendWidget} = {};
-    page.widgetIds.forEach((widgetId: string) => {
-      const w = widgets[widgetId];
-      const { id, displayName } = w; 
-      if (!w) {
-        widgetStateMap[widgetId] = new ErrorWidget(widgetId, widgetId, 'ErrorWidget', '');
-      } else {
-        switch (w.type) {
-          case 'Tabs':
-            widgetStateMap[widgetId] = Tabs.fromJson(w);
-            break;
-          case 'Markdown':
-            widgetStateMap[widgetId] = Markdown.fromJson(w);
-            break;
-          default:
-             widgetStateMap[widgetId] = ErrorWidget.fromJson({
-                id,
-                type: 'ErrorWidget',
-                providerId: '',
-                displayName
-             });
-        }
-        // TODO: SWAP TO THIS WHEN I CAN GET IT WORKING
-        // try {
-          // const WidgetTNow = __non_webpack_require__(dependencies[w.type])
-          // widgetStateMap[widgetId] = WidgetTNow.fromJson(w);
-          // widgetStateMap[widgetId] = WidgetParser.fromJson(w, dependencies[w.type]);
-        // }
-        // catch (e) { 
-          // widgetStateMap[widgetId] = new ErrorWidget(widgetId, widgetId, 'ErrorWidget', '');;
-        // }
-      }
-    });
-
-    return Object.values(widgetStateMap);
+  
+    return page.widgetIds.map(wid => widgets[wid]);
   }
 }
 export function selectConsoleState(state: RootState): FrontendWidget[] {
   return state.console;
+}
+
+export function selectDependencies(state: RootState): {[id: string]: string} {
+  return state.console.dependencies;
 }
 
 export function selectConsoleName(state: RootState): string {

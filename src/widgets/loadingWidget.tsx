@@ -1,9 +1,9 @@
-import { WidgetParser as Widget } from '@tinystacks/ops-core';
+import { BaseWidget } from '@tinystacks/ops-core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Widget as WidgetType} from '@tinystacks/ops-model';
 
-class LoadingWidget extends Widget {
+class LoadingWidget extends BaseWidget {
   public render(): JSX.Element {
     const Loading = () => {
       const { t } = useTranslation();
@@ -12,11 +12,12 @@ class LoadingWidget extends Widget {
     return <Loading />;
   };
 
+
   static fromJson(w: WidgetType): LoadingWidget {
-    return new LoadingWidget(
-      w.type, w.displayName, w.providerId, w.showDisplayName, w.description, w.showDescription, w.id
-    );
+    return new LoadingWidget(w);
   }
+
+  getData(): void | Promise<void> { return; }
 }
 
 export default LoadingWidget;

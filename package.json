@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "jest",
     "prepare": "husky install",
-    "clean": "rm -rf node_modules; rm package-lock.json"
+    "clean": "rm -rf node_modules | rm package-lock.json | rm -rf .next",
+    "clean-install": "npm run clean && npm i"
   },
   "dependencies": {
     "@babel/preset-react": "^7.18.6",
@@ -20,9 +21,9 @@
     "@next/font": "^13.1.6",
     "@reduxjs/toolkit": "^1.9.2",
     "@tinystacks/ops-aws-core-plugins": "^0.0.1",
-    "@tinystacks/ops-core": "^0.1.4-react",
-    "@tinystacks/ops-core-widgets": "file:../ops-core-widgets/tinystacks-ops-core-widgets-0.0.5.tgz",
-    "@tinystacks/ops-model": "1.0.1",
+    "@tinystacks/ops-core": "0.0.0-release",
+    "@tinystacks/ops-core-widgets": "0.0.0-release",
+    "@tinystacks/ops-model": "0.0.0-release",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
@@ -34,6 +35,7 @@
     "framer-motion": "^9.0.2",
     "i18next": "^22.4.9",
     "lodash.isempty": "^4.4.0",
+    "lodash.isequal": "^4.4.0",
     "next": "13.1.6",
     "next-compose-plugins": "^2.2.1",
     "next-optimized-images": "^2.6.2",
@@ -53,6 +55,7 @@
     "@types/eslint-plugin-prettier": "^3.1.0",
     "@types/jest": "^29.4.0",
     "@types/lodash.isempty": "^4.4.7",
+    "@types/lodash.isequal": "^4.4.7",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "babel-preset-env": "^1.7.0",
     "eslint-config-prettier": "^8.6.0",

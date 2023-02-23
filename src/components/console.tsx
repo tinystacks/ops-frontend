@@ -5,7 +5,7 @@ import apis from 'ops-frontend/utils/apis';
 import { useTranslation } from 'react-i18next';
 import { Heading, Stack } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/header-layout';
-import _ from 'lodash';
+import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/fullpage-layout';
 
 // The Console component is a wrapper around a Page
@@ -34,7 +34,7 @@ export function Console(props: { pageContents: ReactNode }) {
   }
 
   useEffect(function () {
-    if (_.isEmpty(pages)) {
+    if (isEmpty(pages)) {
       void fetchData();
     }
   });
@@ -62,17 +62,17 @@ export function Console(props: { pageContents: ReactNode }) {
     );
   }
 
-  function renderLeftNav() {
-    return (
-      <div data-testid='console-left-nav'>
-        {Object.keys(pages).map((page: string) => (
-          <div key={page} data-testid='console-left-nav-item'>
-            {page}
-          </div>
-        ))}
-      </div>
-    );
-  }
+  // function renderLeftNav() {
+  //   return (
+  //     <div data-testid='console-left-nav'>
+  //       {Object.keys(pages).map((page: string) => (
+  //         <div key={page} data-testid='console-left-nav-item'>
+  //           {page}
+  //         </div>
+  //       ))}
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
@@ -80,7 +80,7 @@ export function Console(props: { pageContents: ReactNode }) {
         {renderHeader()}
       </HeaderLayout>
       <FullpageLayout>
-        {renderLeftNav()}
+        {/* {renderLeftNav()} */}
         <Stack data-testid='console-page-contents'>
           {pageContents}
         </Stack>
