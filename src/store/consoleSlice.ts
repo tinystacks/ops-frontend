@@ -1,17 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Console, Page, Provider, Widget } from '@tinystacks/ops-model';
-import { WidgetParser as FrontendWidget } from '@tinystacks/ops-core';
+import { Console, Page, Widget } from '@tinystacks/ops-model';
 import { RootState } from 'ops-frontend/store/store';
+import { WidgetMap } from 'ops-frontend/types';
 
-interface ConsoleState {
-  name: string;
-  pages: Record<string, Page>;
-  widgets: Record<string, Widget>;
-  providers: Record<string, Provider>;
-  dependencies: { [id: string]: string };
-};
-
-export const consoleInitialState: ConsoleState = {
+export const consoleInitialState: Console = {
   // TODO: when we do console stuff, empty state this guy
   name: 'console',
   pages: {},
@@ -26,13 +18,13 @@ export const consoleSlice = createSlice({
   initialState: consoleInitialState,
   reducers: {
     // TODO: API Req + thunk it
-    updateConsoleName: function (state: ConsoleState, action: PayloadAction<string>) {
+    updateConsoleName: function (state: Console, action: PayloadAction<string>) {
       return {
         ...state,
         name: action.payload
       };
     },
-    updatePageWidget: function (state: ConsoleState, action: PayloadAction<Widget>) {
+    updateWidget: function (state: Console, action: PayloadAction<Widget>) {
       const widgets = { ...state.widgets };
       widgets[action.payload.id || ''] = action.payload;
       return {
@@ -40,7 +32,7 @@ export const consoleSlice = createSlice({
         widgets
       };
     },
-    updateConsole: function (state: ConsoleState, action: PayloadAction<Console>) {
+    updateConsole: function (state: Console, action: PayloadAction<Console>) {
       const { payload } = action;
       return {
         name: payload.name,
@@ -54,7 +46,7 @@ export const consoleSlice = createSlice({
 });
 
 export const {
-  updateConsoleName, updatePageWidget, updateConsole
+  updateConsoleName, updateWidget, updateConsole
 } = consoleSlice.actions;
 
 export function selectName(state: RootState) { return state.console.name };
@@ -83,8 +75,12 @@ export function selectPageWidgets(pageId: string) {
     return page.widgetIds.map(wid => widgets[wid]);
   }
 }
-export function selectConsoleState(state: RootState): FrontendWidget[] {
+export function selectConsoleState(state: RootState): Console {
   return state.console;
+}
+
+export function selectConsoleWidgets(state: RootState): WidgetMap {
+  return state.console.widgets;
 }
 
 export function selectDependencies(state: RootState): {[id: string]: string} {
