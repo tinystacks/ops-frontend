@@ -10,3 +10,5 @@ dev.sh
 jest.config.js
 __tests__
 .husky
+cdk
+buildspecs
