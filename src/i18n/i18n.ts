@@ -10,6 +10,7 @@ void i18n
     // or even better, manage them via a UI: 
     //  https://react.i18next.com/guides/multiple-translation-files#manage-your-translations-with-a-management-gui)
     resources: messages,
+    lng: 'en',
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false

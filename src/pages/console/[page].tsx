@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import isEqual from 'lodash.isequal';
-import ErrorWidget from 'ops-frontend/widgets/errorWidget';
 import apis from 'ops-frontend/utils/apis';
 import { useRouter } from 'next/router'
 import { Console } from 'ops-frontend/components/console';
@@ -14,33 +13,34 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
-import { Box, Flex, Heading } from '@chakra-ui/react';
 import { FullpageLayout } from 'ops-frontend/components/fullpage-layout';
 import { Widget } from '@tinystacks/ops-model';
 import { WidgetMap } from 'ops-frontend/types';
+import WrappedWidget from 'ops-frontend/components/widget/wrapped-widget';
 
 // A page consists of
 // 1. A page-level header with the page title and actions
 // 2. A rendered-out list of widgets
 function Page() {
-  const { t } = useTranslation();
+  const { t: common } = useTranslation('common');
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { page: pid } = router.query;
   const pageRoute = pidToPageRoute(pid);
 
   const consoleName = useAppSelector(selectConsoleName);
   const pageId = useAppSelector(selectPageIdFromRoute(pageRoute));
   const page = useAppSelector(selectPage(pageId));
-  const dispatch = useAppDispatch();
   const pageWidgets = useAppSelector(selectPageWidgets(pageId));
   const previousPageWidgets = usePreviousValue(pageWidgets);
   const dependencies = useAppSelector(selectDependencies);
   const consoleWidgets = useAppSelector(selectConsoleWidgets);
-  const [renderedWidgets, setRenderedWidgets] = useState<{[widgetId: string]: JSX.Element}>({});
+  const previousConsoleWidgets = usePreviousValue(consoleWidgets);
+  const [renderedWidgets, setRenderedWidgets] = useState<{ [widgetId: string]: JSX.Element }>({});
 
   useEffect(() => {
-    if ((!previousPageWidgets || isEmpty(Object.keys(previousPageWidgets))) 
-    && pageWidgets && !isEmpty(Object.keys(pageWidgets))) {
+    if ((!previousPageWidgets || isEmpty(Object.keys(previousPageWidgets)))
+      && pageWidgets && !isEmpty(Object.keys(pageWidgets))) {
       void fetchWidgetsForPage(consoleName, pageWidgets, consoleWidgets, dispatch);
     }
   });
@@ -51,18 +51,22 @@ function Page() {
       for (let widget of pageWidgets) {
         hydratedWidgets[widget.id || ''] = await renderWidgetAndChildren(widget, consoleWidgets);
       }
-  
+
       setRenderedWidgets(hydratedWidgets);
     }
 
-    if (!isEqual(previousPageWidgets, pageWidgets) && !isEmpty(dependencies)) {
+    // TODO: deep compare widget trees that are rendered on this page instead
+    if (
+      (!isEqual(previousPageWidgets, pageWidgets) || !isEqual(previousConsoleWidgets, consoleWidgets))
+      && !isEmpty(dependencies)
+    ) {
       void importAndRenderWidgets();
     }
-  }, [previousPageWidgets, pageWidgets, dependencies, renderedWidgets, consoleWidgets]);
+  }, [previousPageWidgets, pageWidgets, dependencies, renderedWidgets, previousConsoleWidgets, consoleWidgets]);
 
   function renderPage() {
     if (!page) {
-      return <FullpageLayout>{t('common.notFound')}</FullpageLayout>;
+      return <FullpageLayout>{common('notFound')}</FullpageLayout>;
     }
 
     return (
@@ -73,41 +77,32 @@ function Page() {
   function renderPageWidgets() {
     // let widgetsRender = <></>;
     // if (!isEmpty(pageWidgets)) {
-      // widgetsRender = pageWidgets.map((w: Widget) => {
-      //   return (
-      //     <Box data-testid='widget' key={w.id}>
-      //       <Flex className='widgetHeader'>
-      //         <Heading as='h4' size='md'>{w.id}</Heading>
-      //       </Flex>
-      //       <Flex className='widgetBody'>
-      //         {w.render()}
-      //         {/* {w.render()} */}
-      //       </Flex>
-      //     </Box>
-      //   );
-      // });
+    // widgetsRender = pageWidgets.map((w: Widget) => {
+    //   return (
+    //     <Box data-testid='widget' key={w.id}>
+    //       <Flex className='widgetHeader'>
+    //         <Heading as='h4' size='md'>{w.id}</Heading>
+    //       </Flex>
+    //       <Flex className='widgetBody'>
+    //         {w.render()}
+    //         {/* {w.render()} */}
+    //       </Flex>
+    //     </Box>
+    //   );
+    // });
     // return <div>{widgetsRender}</div>;
 
     return (
       <div>
-        {Object.entries(renderedWidgets).map(([id, rendered]) => (
-          <Box data-testid='widget' key={id}>
-            <Flex className='widgetHeader'>
-              <Heading as='h4' size='md'>{id}</Heading>
-            </Flex>
-            <Flex className='widgetBody'>
-              {rendered}
-            </Flex>
-          </Box>
-        ))}
+        {Object.values(renderedWidgets)}
       </div>
     );
   }
 
   return (
-      <Console pageContents={(
-          <>{renderPage()}</>
-      )} />
+    <Console pageContents={(
+      <>{renderPage()}</>
+    )} />
   )
 }
 
@@ -130,21 +125,21 @@ export function pidToPageRoute(pid: string | string[] | undefined): string {
 
 
 // pageWidgets only gives us the top-level widgets on the page. Those widgets may have children
-  // because of that, we need console widgets to find and call getWidget on all of those widgets as well
-  // we don't have to worry about these widgets polluting pageWidgets because that's all selected out
+// because of that, we need console widgets to find and call getWidget on all of those widgets as well
+// we don't have to worry about these widgets polluting pageWidgets because that's all selected out
 export async function fetchWidgetsForPage(
   consoleName: string, pageWidgets: Widget[], consoleWidgets: WidgetMap, dispatch: AppDispatch
 ) {
   if (isEmpty(pageWidgets) || isEmpty(consoleName)) {
-      // TODO: throw
-      return;
+    // TODO: throw
+    return;
   }
 
   const widgetsFetchList = getWidgetTreeAsList(pageWidgets, consoleWidgets);
-  
+
   for (const widget of widgetsFetchList) {
     // TODO: dispatch a loading widget
-    const renderWidget = await fetchWidgetData(consoleName, widget);
+    const renderWidget = await apis.getWidget(consoleName, widget);
     dispatch(updateWidget(renderWidget));
   }
 }
@@ -172,26 +167,6 @@ function getWidgetAndChildren(widget: Widget, consoleWidgets: WidgetMap): Widget
   return widgetList;
 }
 
-export async function fetchWidgetData(consoleName: string, widget: Widget): Promise<Widget> {
-    // We want this to be synchronous so that we're not overwriting state inconsistently
-    // Later, we can batch requests + writes to state for better performance
-    const { id } = widget;
-
-    const fetchedWidget = await apis.getWidget(consoleName, id)
-      .catch(e => e);
-
-    let renderWidget: Widget;
-    // Widget type vs error check
-    if (fetchedWidget.type && fetchedWidget.id && fetchedWidget.displayName) {
-      renderWidget = fetchedWidget;
-    } else {
-      // TODO: error message
-      renderWidget = ErrorWidget.fromJson({ ...widget, type: 'ErrorWidget' }).toJson();
-    }
-
-    return renderWidget;
-}
-
 function usePreviousValue(value: any) {
   const ref = useRef();
   useEffect(() => {
@@ -200,7 +175,9 @@ function usePreviousValue(value: any) {
   return ref.current;
 }
 
-async function renderWidgetAndChildren(widget: Widget, consoleWidgets: WidgetMap): Promise<JSX.Element> {
+async function renderWidgetAndChildren(
+  widget: Widget, consoleWidgets: WidgetMap
+): Promise<JSX.Element> {
   const { childrenIds } = widget;
   if (!childrenIds || isEmpty(childrenIds)) {
     return await renderWidget(widget, []);
@@ -209,7 +186,7 @@ async function renderWidgetAndChildren(widget: Widget, consoleWidgets: WidgetMap
   // TODO: Throw if missing
   // TODO: cycle detection
   const children = childrenIds.map(childId => consoleWidgets[childId]);
-  const renderedChildren: (Widget & { renderedElement: JSX.Element })[]= [];
+  const renderedChildren: (Widget & { renderedElement: JSX.Element })[] = [];
   for (const child of children) {
     renderedChildren.push({
       ...widget,
@@ -222,14 +199,29 @@ async function renderWidgetAndChildren(widget: Widget, consoleWidgets: WidgetMap
 
 async function renderWidget(
   widget: Widget, children: (Widget & { renderedElement: JSX.Element })[]
-):Promise<JSX.Element> {
+): Promise<JSX.Element> {
   // if (!isEmpty(widget.childrenIds)) {
-    const imported = await import('@tinystacks/ops-core-widgets');
-    // const imported = await import(dependencies[widget.type]);
-    
-    // @ts-ignore
-    return imported[widget.type].fromJson(widget).render(children);
+  // const imported = await import('@tinystacks/ops-core-widgets');
+  // const imported = await import(dependencies[widget.type]);
+
+  // @ts-ignore
+  // return imported[widget.type].fromJson(widget).render(children);
   // }
+
+  let imported;
+  if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
+    imported = await import('@tinystacks/ops-aws-core-plugins');
+  } else {
+    imported = await import('@tinystacks/ops-core-widgets');
+  }
+  return <WrappedWidget
+    // @ts-ignore
+    rendered={imported[widget.type].fromJson(widget).render(children)}
+    widget={widget}
+  />;
+
 }
+
+
 
 export default Page;

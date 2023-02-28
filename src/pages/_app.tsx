@@ -1,9 +1,9 @@
+import 'ops-frontend/i18n/i18n';
 import 'ops-frontend/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { Provider } from 'react-redux';
 import { store } from 'ops-frontend/store/store';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
-
 
 import { extendTheme, ThemeConfig } from '@chakra-ui/react';
 
@@ -33,7 +33,8 @@ const theme = extendTheme({
       600: '#B593FF',
     },
     gray: {
-      100: 'EDF2F7'
+      100: '#EDF2F7',
+      900: '#101828'
     },
     foregroundGray: '#444444',
     highlightGray: '#777777',
@@ -79,7 +80,6 @@ const theme = extendTheme({
   },
 });
 
-import 'ops-frontend/i18n/i18n';
 import { AppLayout } from 'ops-frontend/components/app-layout';
 export default function App({ Component, pageProps }: AppProps) {
   return (

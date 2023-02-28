@@ -1,20 +1,28 @@
 import React from 'react';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { useTranslation } from 'react-i18next';
-import { Widget as WidgetType} from '@tinystacks/ops-model';
+import { Widget} from '@tinystacks/ops-model';
+
+type ErrorWidgetProps = Widget & { originalType: string, error: string};
 
 class ErrorWidget extends BaseWidget {
+  originalType: string;
+  error: string;
+  constructor (props: ErrorWidgetProps) {
+    super(props);
+    this.originalType = props.originalType;
+    this.error = props.error;
+  }
   render(): JSX.Element {
-    const id = this.id;
+    // const id = this.id;
+    const error = this.error;
     function Renderer() {
-      const { t } = useTranslation();
-      return <>{t('widgets.genericWidgetError', { id })}</>;
+      return <>{error}</>;
     };
 
     return <Renderer />;
   }
 
-  static fromJson(w: WidgetType): ErrorWidget {
+  static fromJson(w: ErrorWidgetProps): ErrorWidget {
     return new ErrorWidget(w);
   }
 

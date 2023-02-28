@@ -32,6 +32,14 @@ export const consoleSlice = createSlice({
         widgets
       };
     },
+    deleteWidget: function (state: Console, action: PayloadAction<string>) {
+      const widgets = { ...state.widgets };
+      delete(widgets[action.payload]);
+      return {
+        ...state,
+        widgets
+      };
+    },
     updateConsole: function (state: Console, action: PayloadAction<Console>) {
       const { payload } = action;
       return {
@@ -46,7 +54,7 @@ export const consoleSlice = createSlice({
 });
 
 export const {
-  updateConsoleName, updateWidget, updateConsole
+  updateConsoleName, updateWidget, deleteWidget, updateConsole
 } = consoleSlice.actions;
 
 export function selectName(state: RootState) { return state.console.name };

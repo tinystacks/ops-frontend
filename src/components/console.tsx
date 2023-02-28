@@ -2,18 +2,18 @@ import { selectPages, updateConsole } from 'ops-frontend/store/consoleSlice';
 import React, { ReactNode, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { useTranslation } from 'react-i18next';
 import { Heading, Stack } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/fullpage-layout';
+import { useTranslation } from 'react-i18next';
 
 // The Console component is a wrapper around a Page
 // It currently includes the console-level header and left-nav 
 
 export function Console(props: { pageContents: ReactNode }) {
   const { pageContents } = props;
-  const { t } = useTranslation();
+  const { t: common } = useTranslation('common');
   const pages = useAppSelector(selectPages);
 
   // TODO: Change this from a component to a page, make it part of our route
@@ -44,11 +44,11 @@ export function Console(props: { pageContents: ReactNode }) {
       <>
         {renderBreadcrumbs()}
         {/* TODO: use dashboard name */}
-        <Heading>{t('common.dashboard')}</Heading>
+        <Heading>{common('dashboard')}</Heading>
         {/* TODO: ACTIONS */}
-        <button>
-          {t('common.settings')}
-        </button>
+        {/* <button> */}
+          {/* {common('settings')} */}
+        {/* </button> */}
       </>
     );
   }

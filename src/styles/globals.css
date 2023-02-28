@@ -119,24 +119,15 @@ li::marker {
 }
 
 .widgetHeader {
-  /* Widget Header */
-  /* Auto layout */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 20px;
-  /* width: 1290px; */
-
-  /* white */
-  background: #FFFFFF;
-  /* Inside auto layout */
-  flex: none;
+  padding: 10px 20px;
+  background-color: #FFFFFF;
   order: 0;
   flex-grow: 0;
   border: solid;
   border-width: 1px;
   border-radius: 5px 5px 0px 0px;
-  border-color: #EDF2F7;
+  border-color: #EDF2F7; /* gray.100 */
+  color: #101828; /* gray.900 */
 }
 
 .widgetBody {
@@ -146,29 +137,34 @@ li::marker {
   flex-direction: column;
   align-items: flex-start;
   padding: 0px;
-
-  /* width: 1290px; */
-
-  background: #FFFFFF;
-
-  /* Inside auto layout */
-
+  background-color: #FFFFFF;
   flex: none;
   order: 1;
   align-self: stretch;
   flex-grow: 0;
-  border: solid;
-  border-width: 1px;  
-  border-radius: 0px 0px 5px 5px;
-  border-color: #EDF2F7;
-  margin-bottom: 12px;
+  border-color: #EDF2F7; /* gray.100 */
 }
 
-.widgetContainer {
-  padding: 20px;
-  background-color: #EDF2F7;
+.paddedWidgetContents {
+  padding: 10px 20px;
+}
+
+.widgetContainer { 
+  background-color: #EDF2F7; /* gray.100 */
+  width: 100%;
+}
+
+.widget {
+  margin: 10px;
+  /* padding: 20px; */
   border-width: 1px;
-  border-radius: 5px;
+  border-radius: 6px;
+  background-color: white;
+  box-shadow: 0px 39px 15px rgba(0, 0, 0, 0.01), 0px 22px 13px rgba(0, 0, 0, 0.02), 0px 10px 10px rgba(0, 0, 0, 0.03), 0px 2px 5px rgba(0, 0, 0, 0.04), 0px 0px 0px rgba(0, 0, 0, 0.04);
+}
+
+.dropdown {
+  box-shadow: 0px 39px 15px rgba(0, 0, 0, 0.01), 0px 22px 13px rgba(0, 0, 0, 0.02), 0px 10px 10px rgba(0, 0, 0, 0.03), 0px 2px 5px rgba(0, 0, 0, 0.04), 0px 0px 0px rgba(0, 0, 0, 0.04) !important;
 }
 
 .app {
