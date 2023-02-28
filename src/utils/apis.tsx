@@ -44,8 +44,9 @@ const apis = {
 function parseWidgetResult(fetchedWidget: Widget | TinyStacksError, widget: Widget) {
   let renderWidget: Widget;
   // Widget type vs error check
-  if (fetchedWidget.type && fetchedWidget.id && fetchedWidget.displayName) {
-    renderWidget = fetchedWidget;
+  const castWidget = fetchedWidget as Widget;
+  if (castWidget.type && castWidget.id && castWidget.displayName) {
+    renderWidget = castWidget;
   } else {
     // TODO: error message
     renderWidget = ErrorWidget.fromJson({
