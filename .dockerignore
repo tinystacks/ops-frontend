@@ -1,0 +1,14 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+.git
+.eslintrc
+dev.sh
+jest.config.js
+__tests__
+.husky
+cdk
+buildspecs
