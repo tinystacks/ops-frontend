@@ -22,10 +22,10 @@
     "@next/bundle-analyzer": "^13.1.6",
     "@next/font": "^13.1.6",
     "@reduxjs/toolkit": "^1.9.2",
-    "@tinystacks/ops-aws-core-plugins": "0.0.1",
-    "@tinystacks/ops-core": "0.0.3-release",
-    "@tinystacks/ops-core-widgets": "0.0.1-release",
-    "@tinystacks/ops-model": "0.0.0-release",
+    "@tinystacks/ops-aws-core-plugins": "0.0.4-release",
+    "@tinystacks/ops-core": "0.0.4-release",
+    "@tinystacks/ops-core-widgets": "0.0.4-release",
+    "@tinystacks/ops-model": "0.0.4-release",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
@@ -46,6 +46,7 @@
     "react-redux": "^8.0.5",
     "redux": "^4.2.1",
     "responsive-loader": "^3.1.2",
+    "rsuite": "^5.28.0",
     "typescript": "4.9.5"
   },
   "devDependencies": {

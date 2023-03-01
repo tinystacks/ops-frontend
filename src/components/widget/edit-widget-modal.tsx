@@ -1,5 +1,4 @@
 import React from 'react';
-import { Widget } from '@tinystacks/ops-model';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { useTranslation } from 'react-i18next';
 import {
@@ -7,19 +6,21 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import apis from 'ops-frontend/utils/apis';
-import { updateWidget } from 'ops-frontend/store/consoleSlice';
+import { selectWidget, updateHydratedWidget, updateWidget } from 'ops-frontend/store/consoleSlice';
 import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
+import { useSelector } from 'react-redux';
 
-export default function EditWidgetModal(props: { console: string, widget: Widget }) {
+export default function EditWidgetModal(props: { console: string, widgetId: string }) {
   // i18n
   const { t: commonMsg } = useTranslation('common');
   const { t: widgetMsg } = useTranslation('widget');
 
+  // props
+  const { console, widgetId } = props;
+
   // redux
   const dispatch = useAppDispatch();
-
-  // props
-  const { console, widget } = props;
+  const widget = useSelector(selectWidget(widgetId));
 
   //state
   const [value, setValue] = React.useState(JSON.stringify(widget, undefined, 2));
@@ -38,6 +39,8 @@ export default function EditWidgetModal(props: { console: string, widget: Widget
     try {
       const updatedWidget = await apis.updateWidget(console, widget.id, JSON.parse(value));
       dispatch(updateWidget(updatedWidget));
+      const hydratedUpdatedWidget = await apis.getWidget(console, widget);
+      dispatch(updateHydratedWidget(hydratedUpdatedWidget));
     } catch (e) {
       setError(widget.id);
     }
@@ -58,7 +61,7 @@ export default function EditWidgetModal(props: { console: string, widget: Widget
       <Modal isOpen={isOpen} onClose={resetAndClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{widgetMsg('editWidgetTitle', { ...props.widget })}</ModalHeader>
+          <ModalHeader>{widgetMsg('editWidgetTitle', { ...widget })}</ModalHeader>
           <ModalCloseButton />
           <DynamicModalBody
             error={error}
