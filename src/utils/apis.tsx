@@ -36,7 +36,8 @@ const apis = {
     );
   },
   async getConsoles() {
-    return await client.console.getConsoles();
+    const consoleClient = new OpsApiClient({ BASE: '/api' });
+    return await consoleClient.console.getConsoles();
   }
 };
 
