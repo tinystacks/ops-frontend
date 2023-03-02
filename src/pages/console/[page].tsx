@@ -5,8 +5,8 @@ import apis from 'ops-frontend/utils/apis';
 import { useRouter } from 'next/router'
 import { Console } from 'ops-frontend/components/console';
 import {
-  selectConsoleName, selectConsoleWidgets, selectDependencies, selectPage, selectPageIdFromRoute,
-  selectPageWidgets, updateWidget
+  selectConsoleName, selectConsoleWidgets, selectDependencies, selectHydratedWidgets, selectPage, selectPageIdFromRoute,
+  selectPageWidgets, updateHydratedWidget
 } from 'ops-frontend/store/consoleSlice';
 import { useAppSelector } from 'ops-frontend/store/hooks';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +36,9 @@ function Page() {
   const dependencies = useAppSelector(selectDependencies);
   const consoleWidgets = useAppSelector(selectConsoleWidgets);
   const previousConsoleWidgets = usePreviousValue(consoleWidgets);
+  const hydratedWidgets = useAppSelector(selectHydratedWidgets);
+  const previousHydratedWidgets = usePreviousValue(hydratedWidgets);
+
   const [renderedWidgets, setRenderedWidgets] = useState<{ [widgetId: string]: JSX.Element }>({});
 
   useEffect(() => {
@@ -47,22 +50,27 @@ function Page() {
 
   useEffect(() => {
     async function importAndRenderWidgets() {
-      const hydratedWidgets = { ...renderedWidgets };
+      const deepRenderedWidgets = { ...renderedWidgets };
       for (let widget of pageWidgets) {
-        hydratedWidgets[widget.id || ''] = await renderWidgetAndChildren(widget, consoleWidgets);
+        deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(widget, hydratedWidgets);
       }
 
-      setRenderedWidgets(hydratedWidgets);
+      setRenderedWidgets(deepRenderedWidgets);
     }
 
     // TODO: deep compare widget trees that are rendered on this page instead
-    if (
-      (!isEqual(previousPageWidgets, pageWidgets) || !isEqual(previousConsoleWidgets, consoleWidgets))
-      && !isEmpty(dependencies)
+    if ((
+        !isEqual(previousPageWidgets, pageWidgets) ||
+        !isEqual(previousConsoleWidgets, consoleWidgets) ||
+        !isEqual(previousHydratedWidgets, hydratedWidgets)
+      ) && !isEmpty(dependencies)
     ) {
       void importAndRenderWidgets();
     }
-  }, [previousPageWidgets, pageWidgets, dependencies, renderedWidgets, previousConsoleWidgets, consoleWidgets]);
+  }, [
+    previousPageWidgets, pageWidgets, dependencies, renderedWidgets, previousConsoleWidgets, consoleWidgets,
+    hydratedWidgets, previousHydratedWidgets
+  ]);
 
   function renderPage() {
     if (!page) {
@@ -140,7 +148,7 @@ export async function fetchWidgetsForPage(
   for (const widget of widgetsFetchList) {
     // TODO: dispatch a loading widget
     const renderWidget = await apis.getWidget(consoleName, widget);
-    dispatch(updateWidget(renderWidget));
+    dispatch(updateHydratedWidget(renderWidget));
   }
 }
 
@@ -176,7 +184,7 @@ function usePreviousValue(value: any) {
 }
 
 async function renderWidgetAndChildren(
-  widget: Widget, consoleWidgets: WidgetMap
+  widget: Widget, hydratedWidgets: WidgetMap
 ): Promise<JSX.Element> {
   const { childrenIds } = widget;
   if (!childrenIds || isEmpty(childrenIds)) {
@@ -185,12 +193,12 @@ async function renderWidgetAndChildren(
 
   // TODO: Throw if missing
   // TODO: cycle detection
-  const children = childrenIds.map(childId => consoleWidgets[childId]);
+  const children = childrenIds.map(childId => hydratedWidgets[childId]);
   const renderedChildren: (Widget & { renderedElement: JSX.Element })[] = [];
   for (const child of children) {
     renderedChildren.push({
       ...widget,
-      renderedElement: await renderWidgetAndChildren(child, consoleWidgets)
+      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets)
     });
   }
 
@@ -214,12 +222,12 @@ async function renderWidget(
   } else {
     imported = await import('@tinystacks/ops-core-widgets');
   }
-  return <WrappedWidget
+    return <WrappedWidget
     // @ts-ignore
-    rendered={imported[widget.type].fromJson(widget).render(children)}
+    hydratedWidget={imported[widget.type].fromJson(widget)}
     widget={widget}
+    childrenWidgets={children}
   />;
-
 }
 
 

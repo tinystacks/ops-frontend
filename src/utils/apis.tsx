@@ -4,12 +4,12 @@ import ErrorWidget from 'ops-frontend/widgets/errorWidget';
 // This file mostly exists to make testing easy
 const client = new OpsApiClient({ BASE: 'http://localhost:8000' });
 const apis = {
-  async getWidget(consoleName: string, widget: Widget): Promise<Widget> {
+  async getWidget(consoleName: string, widget: Widget, overrides?: any): Promise<Widget> {
     // We want this to be synchronous so that we're not overwriting state inconsistently
     // Later, we can batch requests + writes to state for better performance
 
     return parseWidgetResult(
-      await client.widget.getWidget(consoleName, widget.id).catch(e => e.message),
+      await client.widget.getWidget(consoleName, widget.id, overrides).catch(e => e.message),
       widget
     );
   },

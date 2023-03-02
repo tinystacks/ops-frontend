@@ -5,10 +5,28 @@ import { HamburgerIcon } from '@chakra-ui/icons'
 import { Widget } from '@tinystacks/ops-model';
 import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
 import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
+import { BaseWidget } from '@tinystacks/ops-core';
+import { updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
+import { useAppDispatch } from 'ops-frontend/store/hooks';
+import apis from 'ops-frontend/utils/apis';
 
-export default function WrappedWidget(props: { rendered: JSX.Element, widget: Widget }) {
+export type WrappedWidgetProps = {
+  hydratedWidget: BaseWidget,
+  widget: Widget,
+  childrenWidgets: (Widget & { renderedElement: JSX.Element })[]
+};
+
+export default function WrappedWidget(props: WrappedWidgetProps) {
+  // redux
+  const dispatch = useAppDispatch();
+
   // props
-  const { rendered, widget } = props;
+  const { hydratedWidget, widget, childrenWidgets } = props;
+
+  function updateOverrides (overrides: any) {
+    void apis.getWidget('console', widget, overrides)
+      .then(w => dispatch(updateHydratedWidget(w)));
+  };
 
   // undefined display options default to true
   const heading = widget.displayOptions?.showDisplayName === false ?
@@ -30,7 +48,7 @@ export default function WrappedWidget(props: { rendered: JSX.Element, widget: Wi
               variant='outline'
             />
             <MenuList className='dropdown'>
-              <EditWidgetModal console='console' widget={widget} />
+              <EditWidgetModal console='console' widgetId={widget.id} />
               <DeleteWidgetModal console='console' widget={widget} />
             </MenuList>
           </Menu>
@@ -41,7 +59,10 @@ export default function WrappedWidget(props: { rendered: JSX.Element, widget: Wi
     <Box data-testid='widget' className='widget' key={widget.id}>
       {heading}
       <Flex className='widgetBody'>
-        {rendered}
+        {hydratedWidget.render(
+          childrenWidgets,
+          updateOverrides
+        )}
       </Flex>
     </Box>
   );
