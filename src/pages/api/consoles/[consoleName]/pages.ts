@@ -1,25 +1,26 @@
-import { Console, TinyStacksError } from '@tinystacks/ops-model'
+import { Page, TinyStacksError } from '@tinystacks/ops-model'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getOpsApiClient } from 'ops-frontend/utils/get-ops-api-client';
 import { handleResponse } from 'ops-frontend/utils/handle-response';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Console[] | Console | TinyStacksError>
+  res: NextApiResponse<Page[] | Page | TinyStacksError>
 ) {
   try {
     const client = await getOpsApiClient();
-    const consoleClient = client.console;
+    const pageClient = client.page;
+    const consoleName = req.query.consoleName as string;
     const method = req.method;
 
     switch (method) {
       case 'POST':
-        const createResponse = await consoleClient.createConsole(req.body);
-        handleResponse<Console | TinyStacksError>(createResponse, res);
+        const createResponse = await pageClient.createPage(consoleName, req.body);
+        handleResponse<Page | TinyStacksError>(createResponse, res);
         break;
       case 'GET':
-        const retrieveResponse = await consoleClient.getConsoles();
-        handleResponse<Console[] | TinyStacksError>(retrieveResponse, res);
+        const getResponse = await pageClient.getPages(consoleName);
+        handleResponse<Page[] | TinyStacksError>(getResponse, res);
         break;
       default:
         res.setHeader('Allow', ['POST', 'GET']);

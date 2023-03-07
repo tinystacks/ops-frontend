@@ -1,28 +1,25 @@
-import { Console, TinyStacksError } from '@tinystacks/ops-model'
+import { TinyStacksError, Widget } from '@tinystacks/ops-model'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getOpsApiClient } from 'ops-frontend/utils/get-ops-api-client';
 import { handleResponse } from 'ops-frontend/utils/handle-response';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Console[] | Console | TinyStacksError>
+  res: NextApiResponse<Widget | TinyStacksError>
 ) {
   try {
     const client = await getOpsApiClient();
-    const consoleClient = client.console;
+    const widgetClient = client.widget;
+    const consoleName = req.query.consoleName as string;
     const method = req.method;
 
     switch (method) {
       case 'POST':
-        const createResponse = await consoleClient.createConsole(req.body);
-        handleResponse<Console | TinyStacksError>(createResponse, res);
-        break;
-      case 'GET':
-        const retrieveResponse = await consoleClient.getConsoles();
-        handleResponse<Console[] | TinyStacksError>(retrieveResponse, res);
+        const createResponse = await widgetClient.createWidget(consoleName, req.body);
+        handleResponse<Widget | TinyStacksError>(createResponse, res);
         break;
       default:
-        res.setHeader('Allow', ['POST', 'GET']);
+        res.setHeader('Allow', ['POST']);
         res.status(405).end(`Method ${method} Not Allowed`);
         break;
     }
