@@ -17,7 +17,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "outDir": "./dist",
     "paths": {
       "ops-frontend/*": [

@@ -1,4 +1,4 @@
-import { LocaleMessageType } from 'ops-frontend/i18n/messages';
+import { LocaleMessageType } from 'i18n/messages';
 
 const common: LocaleMessageType = {
   close: 'Close',
@@ -6,10 +6,12 @@ const common: LocaleMessageType = {
   loading: 'Loading',
   settings: 'Settings',
   dashboard: 'Dashboard',
+  dashboards: 'Dashboards',
   edit: 'Edit',
   save: 'Save',
   exit: 'Exit',
-  delete: 'Delete'
+  delete: 'Delete',
+  opsConsole: 'Ops Console'
 };
 
 export default common;

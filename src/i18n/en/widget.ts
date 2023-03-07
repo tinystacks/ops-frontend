@@ -1,4 +1,4 @@
-import { LocaleMessageType } from 'ops-frontend/i18n/messages';
+import { LocaleMessageType } from 'i18n/messages';
 
 const widgets: LocaleMessageType = {
   genericWidgetError: '{{id}} was not found or inaccurately set in yml',

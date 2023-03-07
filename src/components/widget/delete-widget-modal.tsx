@@ -1,12 +1,12 @@
 import {
   Button, MenuItem, Modal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure
 } from '@chakra-ui/react';
-import { useAppDispatch } from 'ops-frontend/store/hooks';
-import apis from 'ops-frontend/utils/apis';
+import { useAppDispatch } from 'store/hooks';
+import apis from 'utils/apis';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
-import { deleteWidget } from 'ops-frontend/store/consoleSlice';
+import DynamicModalBody from 'components/modal/dynamic-modal-body';
+import { deleteWidget } from 'store/consoleSlice';
 import { Widget } from '@tinystacks/ops-model';
 
 export default function DeleteWidgetModal(props: { console: string, widget: Widget}) {

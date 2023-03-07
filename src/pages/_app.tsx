@@ -1,8 +1,8 @@
-import 'ops-frontend/i18n/i18n';
-import 'ops-frontend/styles/globals.css'
+import 'i18n/i18n';
+import 'styles/globals.css'
 import type { AppProps } from 'next/app'
 import { Provider } from 'react-redux';
-import { store } from 'ops-frontend/store/store';
+import { store } from 'store/store';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 
 import { extendTheme, ThemeConfig } from '@chakra-ui/react';
@@ -80,7 +80,7 @@ const theme = extendTheme({
   },
 });
 
-import { AppLayout } from 'ops-frontend/components/app-layout';
+import { AppLayout } from 'components/app-layout';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>

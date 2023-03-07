@@ -1,13 +1,13 @@
 import React from 'react';
-import { useAppDispatch } from 'ops-frontend/store/hooks';
+import { useAppDispatch } from 'store/hooks';
 import { useTranslation } from 'react-i18next';
 import {
   Button, MenuItem, Modal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Textarea,
   useDisclosure
 } from '@chakra-ui/react';
-import apis from 'ops-frontend/utils/apis';
-import { selectWidget, updateHydratedWidget, updateWidget } from 'ops-frontend/store/consoleSlice';
-import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
+import apis from 'utils/apis';
+import { selectWidget, updateHydratedWidget, updateWidget } from 'store/consoleSlice';
+import DynamicModalBody from 'components/modal/dynamic-modal-body';
 import { useSelector } from 'react-redux';
 
 export default function EditWidgetModal(props: { console: string, widgetId: string }) {
