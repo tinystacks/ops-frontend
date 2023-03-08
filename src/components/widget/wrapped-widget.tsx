@@ -3,12 +3,12 @@ import {
 } from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons'
 import { Widget } from '@tinystacks/ops-model';
-import EditWidgetModal from 'components/widget/edit-widget-modal';
-import DeleteWidgetModal from 'components/widget/delete-widget-modal';
+import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
+import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { updateHydratedWidget } from 'store/consoleSlice';
-import { useAppDispatch } from 'store/hooks';
-import apis from 'utils/apis';
+import { updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
+import { useAppDispatch } from 'ops-frontend/store/hooks';
+import apis from 'ops-frontend/utils/apis';
 
 export type WrappedWidgetProps = {
   hydratedWidget: BaseWidget,

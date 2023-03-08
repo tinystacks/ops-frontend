@@ -1,4 +1,4 @@
-import { DashboardList } from 'components/home/DashboardList';
+import { DashboardList } from 'ops-frontend/components/home/DashboardList';
 
 const Home = () => {
   return (

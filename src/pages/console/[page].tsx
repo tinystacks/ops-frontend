@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import isEqual from 'lodash.isequal';
-import apis from 'utils/apis';
+import apis from 'ops-frontend/utils/apis';
 import { useRouter } from 'next/router'
-import { Console } from 'components/Dashboard';
+import { Console } from 'ops-frontend/components/Dashboard';
 import {
   selectConsoleName, selectConsoleWidgets, selectDependencies, selectHydratedWidgets, selectPage, selectPageIdFromRoute,
   selectPageWidgets, updateHydratedWidget
-} from 'store/consoleSlice';
-import { useAppSelector } from 'store/hooks';
+} from 'ops-frontend/store/consoleSlice';
+import { useAppSelector } from 'ops-frontend/store/hooks';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
-import { useAppDispatch } from 'store/hooks';
-import { AppDispatch } from 'store/store';
-import { FullpageLayout } from 'components/fullpage-layout';
+import { useAppDispatch } from 'ops-frontend/store/hooks';
+import { AppDispatch } from 'ops-frontend/store/store';
+import { FullpageLayout } from 'ops-frontend/components/fullpage-layout';
 import { Widget } from '@tinystacks/ops-model';
-import { WidgetMap } from 'types';
-import WrappedWidget from 'components/widget/wrapped-widget';
+import { WidgetMap } from 'ops-frontend/types';
+import WrappedWidget from 'ops-frontend/components/widget/wrapped-widget';
 
 // A page consists of
 // 1. A page-level header with the page title and actions

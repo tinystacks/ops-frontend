@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Console, Page, Widget } from '@tinystacks/ops-model';
-import { RootState } from 'store/store';
-import { WidgetMap } from 'types';
+import { RootState } from 'ops-frontend/store/store';
+import { WidgetMap } from 'ops-frontend/types';
 
 type ConsoleSliceState = Console & {
   overrides: { [widgetId: string]: any; };

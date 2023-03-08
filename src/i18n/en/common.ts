@@ -1,4 +1,4 @@
-import { LocaleMessageType } from 'i18n/messages';
+import { LocaleMessageType } from 'ops-frontend/i18n/messages';
 
 const common: LocaleMessageType = {
   close: 'Close',

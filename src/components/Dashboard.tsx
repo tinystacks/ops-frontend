@@ -1,11 +1,11 @@
-import { selectPages, updateConsole } from 'store/consoleSlice';
+import { selectPages, updateConsole } from 'ops-frontend/store/consoleSlice';
 import React, { ReactNode, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from 'store/hooks';
-import apis from 'utils/apis';
+import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
+import apis from 'ops-frontend/utils/apis';
 import { Heading, Stack } from '@chakra-ui/react';
-import { HeaderLayout } from 'components/header-layout';
+import { HeaderLayout } from 'ops-frontend/components/header-layout';
 import isEmpty from 'lodash.isempty';
-import { FullpageLayout } from 'components/fullpage-layout';
+import { FullpageLayout } from 'ops-frontend/components/fullpage-layout';
 import { useTranslation } from 'react-i18next';
 
 // The Console component is a wrapper around a Page

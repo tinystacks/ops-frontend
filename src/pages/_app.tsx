@@ -1,10 +1,10 @@
-import 'i18n/i18n';
-import 'styles/globals.css'
+import 'ops-frontend/i18n/i18n';
+import 'ops-frontend/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { Provider } from 'react-redux';
-import { store } from 'store/store';
+import { store } from 'ops-frontend/store/store';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
-
+import { AppLayout } from 'ops-frontend/components/app-layout';
 import { extendTheme, ThemeConfig } from '@chakra-ui/react';
 
 export const PURPLE_GRADIENT = 'linear(to-r, lightpurple.500, purple.500)';
@@ -80,7 +80,6 @@ const theme = extendTheme({
   },
 });
 
-import { AppLayout } from 'components/app-layout';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>

@@ -10,7 +10,7 @@ import {
   Button,
   HStack,
 } from '@chakra-ui/react';
-import { HeaderLayout } from 'components/header-layout';
+import { HeaderLayout } from 'ops-frontend/components/header-layout';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
