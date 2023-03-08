@@ -15,11 +15,7 @@ class ErrorWidget extends BaseWidget {
   render(): JSX.Element {
     // const id = this.id;
     const error = this.error;
-    function Renderer() {
-      return <>{error}</>;
-    };
-
-    return <Renderer />;
+    return <>{error}</>;
   }
 
   static fromJson(w: ErrorWidgetProps): ErrorWidget {

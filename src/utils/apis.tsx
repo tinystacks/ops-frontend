@@ -48,7 +48,6 @@ function parseWidgetResult(fetchedWidget: Widget | TinyStacksError, widget: Widg
   if (castWidget.type && castWidget.id && castWidget.displayName) {
     renderWidget = castWidget;
   } else {
-    // TODO: error message
     renderWidget = ErrorWidget.fromJson({
       ...widget,
       type: 'ErrorWidget',

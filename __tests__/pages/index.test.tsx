@@ -9,6 +9,6 @@ describe('Home', () => {
   it('renders the ops console header', async () => {
     renderWithProviders(<Home />);
 
-    await screen.findByText('home.title');
+    await screen.findByText('dashboard');
   })
 });

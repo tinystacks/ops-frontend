@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
+    "test-cov": "jest --collect-coverage",
     "prepare": "husky install",
     "clean": "rm -rf node_modules | rm package-lock.json | rm -rf .next",
     "clean-install": "npm run clean && npm i"
