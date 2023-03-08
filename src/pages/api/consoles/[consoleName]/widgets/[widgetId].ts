@@ -13,12 +13,12 @@ export default async function handler(
     const widgetClient = client.widget;
     const consoleName = req.query.consoleName as string;
     const widgetId = req.query.widgetId as string;
-    const overrides = req.query.overrides as any;
+    // const overrides = req.query.overrides as any;
     const method = req.method;
 
     switch (method) {
       case 'GET':
-        const createResponse = await widgetClient.getWidget(consoleName, widgetId, overrides);
+        const createResponse = await widgetClient.getWidget(consoleName, widgetId);//, overrides);
         handleResponse<Widget | TinyStacksError>(createResponse, res);
         break;
       case 'PUT':
