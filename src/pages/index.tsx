@@ -1,9 +1,9 @@
-import { DashboardList } from 'ops-frontend/components/home/DashboardList';
+import { DashboardList } from 'ops-frontend/components/dashboard/dashboard-list';
 
-const Home = () => {
+export default function Home () {
   return (
-    <DashboardList />
+    <>
+      <DashboardList />
+    </>
   );
 }
-
-export default Home;

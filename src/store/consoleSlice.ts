@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Console, Page, Widget } from '@tinystacks/ops-model';
+import { Console, Dashboard, Widget } from '@tinystacks/ops-model';
 import { RootState } from 'ops-frontend/store/store';
 import { WidgetMap } from 'ops-frontend/types';
 
@@ -10,8 +10,8 @@ type ConsoleSliceState = Console & {
 
 export const consoleInitialState: ConsoleSliceState = {
   // TODO: when we do console stuff, empty state this guy
-  name: 'console',
-  pages: {},
+  name: '',
+  dashboards: {},
   widgets: {},
   providers: {},
   dependencies: {},
@@ -64,7 +64,7 @@ export const consoleSlice = createSlice({
       return {
         ...state,
         name: payload.name,
-        pages: payload.pages,
+        dashboards: payload.dashboards,
         widgets: payload.widgets,
         hydratedWidgets: payload.widgets,
         providers: payload.providers,
@@ -90,29 +90,29 @@ export const {
 } = consoleSlice.actions;
 
 export function selectName(state: RootState) { return state.console.name };
-export function selectPages(state: RootState) { return state.console.pages };
-export function selectPageIdFromRoute(route: string) {
+export function selectDashboards(state: RootState): { [id: string]: Dashboard } { return state.console.dashboards };
+export function selectDashboardIdFromRoute(route: string) {
   return function (state: RootState): string {
-    const { pages } = state.console;
-    const pageId = Object.keys(pages).find(page => pages[page].route === route);
-    return pageId || '';
+    const { dashboards } = state.console;
+    const dashboardId = Object.keys(dashboards).find(dashboard => dashboards[dashboard].route === route);
+    return dashboardId || '';
   }
 }
-export function selectPage(pageId: string) {
-  return function (state: RootState) {
-    return state.console.pages[pageId];
+export function selectDashboard(dashboardId: string) {
+  return function (state: RootState): Dashboard | undefined {
+    return state.console.dashboards[dashboardId];
   }
 }
 
-export function selectPageWidgets(pageId: string) {
+export function selectDashboardWidgets(dashboardId: string) {
   return function (state: RootState): Widget[] {
-    const { pages, hydratedWidgets } = state.console;
-    const page: Page = pages[pageId];
-    if (!page || !page.widgetIds) {
+    const { dashboards, hydratedWidgets } = state.console;
+    const dashboard: Dashboard = dashboards[dashboardId];
+    if (!dashboard || !dashboard.widgetIds) {
       return [];
     }
 
-    return page.widgetIds.map(wid => hydratedWidgets[wid]);
+    return dashboard.widgetIds.map(wid => hydratedWidgets[wid]);
   }
 }
 export function selectConsoleState(state: RootState): Console {

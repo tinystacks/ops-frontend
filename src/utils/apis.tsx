@@ -2,7 +2,7 @@ import { OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
 import ErrorWidget from 'ops-frontend/widgets/errorWidget';
 
 // This file mostly exists to make testing easy
-const client = new OpsApiClient({ BASE: 'http://localhost:8000' });
+const client = new OpsApiClient({ BASE: 'http://code.zsimjee.com:8000' });
 const apis = {
   async getWidget(consoleName: string, widget: Widget, overrides?: any): Promise<Widget> {
     // We want this to be synchronous so that we're not overwriting state inconsistently
