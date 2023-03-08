@@ -1,5 +1,5 @@
 import { OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
-import ErrorWidget from 'ops-frontend/widgets/errorWidget';
+import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
 // This file mostly exists to make testing easy
 const client = new OpsApiClient({ BASE: 'http://code.zsimjee.com:8000' });

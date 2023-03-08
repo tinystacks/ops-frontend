@@ -26,7 +26,7 @@ export function DashboardList () {
     }
   }
 
-  useEffect(() => {
+  useEffect(function () {
     if (isEmpty(dashboards)) {
       void fetchData();
     }
