@@ -4,22 +4,16 @@ import type { AppProps } from 'next/app'
 import { Provider } from 'react-redux';
 import { store } from 'ops-frontend/store/store';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
-
-import { extendTheme, ThemeConfig } from '@chakra-ui/react';
+import { AppLayout } from 'ops-frontend/components/layout/app-layout';
+import { extendTheme } from '@chakra-ui/react';
 
 export const PURPLE_GRADIENT = 'linear(to-r, lightpurple.500, purple.500)';
 export const PURPLE_GRADIENT_HOVER =
   'linear(to-r, lightpurple.600, purple.600)';
 
-// 2. Add your color mode config
-const config: ThemeConfig = {
+const theme = extendTheme({
   initialColorMode: 'light',
   useSystemColorMode: true,
-};
-
-// 3. extend the theme
-const theme = extendTheme({
-  ...config,
   colors: {
     primary: '#111111',
     secondary: '#222222',
@@ -80,15 +74,14 @@ const theme = extendTheme({
   },
 });
 
-import { AppLayout } from 'ops-frontend/components/app-layout';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
       <ChakraProvider theme={theme}>
         <CSSReset />
-        <AppLayout>
-          <Component {...pageProps} />
-        </AppLayout>
+          <AppLayout>
+            <Component {...pageProps} />
+          </AppLayout>
       </ChakraProvider>
     </Provider>
   );

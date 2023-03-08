@@ -1,8 +1,8 @@
 import { OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
-import ErrorWidget from 'ops-frontend/widgets/errorWidget';
+import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
 // This file mostly exists to make testing easy
-const client = new OpsApiClient({ BASE: 'http://localhost:8000' });
+const client = new OpsApiClient({ BASE: 'http://code.zsimjee.com:8000' });
 const apis = {
   async getWidget(consoleName: string, widget: Widget, overrides?: any): Promise<Widget> {
     // We want this to be synchronous so that we're not overwriting state inconsistently
@@ -48,7 +48,6 @@ function parseWidgetResult(fetchedWidget: Widget | TinyStacksError, widget: Widg
   if (castWidget.type && castWidget.id && castWidget.displayName) {
     renderWidget = castWidget;
   } else {
-    // TODO: error message
     renderWidget = ErrorWidget.fromJson({
       ...widget,
       type: 'ErrorWidget',

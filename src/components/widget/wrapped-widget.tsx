@@ -6,8 +6,8 @@ import { Widget } from '@tinystacks/ops-model';
 import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
 import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
-import { useAppDispatch } from 'ops-frontend/store/hooks';
+import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
+import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
 
 export type WrappedWidgetProps = {
@@ -19,12 +19,12 @@ export type WrappedWidgetProps = {
 export default function WrappedWidget(props: WrappedWidgetProps) {
   // redux
   const dispatch = useAppDispatch();
-
+  const consoleName = useAppSelector(selectConsoleName);
   // props
   const { hydratedWidget, widget, childrenWidgets } = props;
 
   function updateOverrides (overrides: any) {
-    void apis.getWidget('console', widget, overrides)
+    void apis.getWidget(consoleName, widget, overrides)
       .then(w => dispatch(updateHydratedWidget(w)));
   };
 
@@ -48,8 +48,8 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
               variant='outline'
             />
             <MenuList className='dropdown'>
-              <EditWidgetModal console='console' widgetId={widget.id} />
-              <DeleteWidgetModal console='console' widget={widget} />
+              <EditWidgetModal console={consoleName} widgetId={widget.id} />
+              <DeleteWidgetModal console={consoleName} widget={widget} />
             </MenuList>
           </Menu>
         </Box>
