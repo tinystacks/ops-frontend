@@ -1,4 +1,4 @@
-import ErrorWidget from 'ops-frontend/widgets/errorWidget';
+import ErrorWidget from 'ops-frontend/widgets/error-widget';
 import { screen, render } from '@testing-library/react';
 import { mockI18n } from 'ops-frontend-test/test-utils/i18n';
 

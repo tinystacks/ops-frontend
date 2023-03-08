@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 // import { Footer } from 'components/common/Footer';
-// import Navbar from 'components/navbar/Navbar';
+import Navbar from 'ops-frontend/components/layout/navbar';
 import Head from 'next/head';
 import React from 'react';
 
@@ -23,7 +23,7 @@ export function AppLayout (props: LayoutProps) {
         <link rel="icon" href="/iconv2.svg" />
       </Head>
       <Flex flexDirection="column" h="100vh" minWidth="sm" overflow="auto" className='app'>
-        {/* <Navbar /> */}
+        <Navbar />
         {props.children}
         {/* <Footer /> */}
       </Flex>

@@ -6,10 +6,12 @@ const common: LocaleMessageType = {
   loading: 'Loading',
   settings: 'Settings',
   dashboard: 'Dashboard',
+  dashboards: 'Dashboards',
   edit: 'Edit',
   save: 'Save',
   exit: 'Exit',
-  delete: 'Delete'
+  delete: 'Delete',
+  opsConsole: 'Ops Console'
 };
 
 export default common;
