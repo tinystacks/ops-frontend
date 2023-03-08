@@ -3,7 +3,7 @@
 callerIdentity=$(aws sts get-caller-identity);
 accountId=$(jq -r .Account <<< $callerIdentity);
 version=$(cat ./package.json | jq -r .version);
-appName=$(cat ./package.json | jq -r .name);
+appName=$(cat ./package.json | jq -r .name | sed 's/\// /g'| awk '{print $2}');
 commitSha=$(git rev-parse HEAD);
 region="${AWS_REGION:-us-east-1}";
 ecrEndpoint="${accountId}.dkr.ecr.${region}.amazonaws.com";
