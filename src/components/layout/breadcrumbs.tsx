@@ -1,7 +1,7 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react';
 import React from 'react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { selectConsoleName, selectDashboard, selectDashboardIdFromRoute } from 'ops-frontend/store/consoleSlice';
+import { selectDashboard, selectDashboardIdFromRoute } from 'ops-frontend/store/consoleSlice';
 import { useAppSelector } from 'ops-frontend/store/hooks';
 import { useTranslation } from 'react-i18next';
 import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
@@ -13,7 +13,6 @@ export default function Breadcrumbs() {
 
   const { dashboard: dashboardQuery } = router.query;
   const dashboardRoute = dashboardQueryToDashboardRoute(dashboardQuery);
-  const consoleName = useAppSelector(selectConsoleName);
   const dashboardId = useAppSelector(selectDashboardIdFromRoute(dashboardRoute));
   const dashboard = useAppSelector(selectDashboard(dashboardId));
   const { t: cm } = useTranslation('common');
@@ -21,11 +20,8 @@ export default function Breadcrumbs() {
 
   function createBreadcrumbs() {
     const breadcrumbs = [];
-    if (!consoleName) {
-      return [createBreadcrumb(cm('opsConsole'), '/', true)];
-    }
 
-    breadcrumbs.push(createBreadcrumb(consoleName, '/', !dashboardRoute));
+    breadcrumbs.push(createBreadcrumb(cm('dashboards'), '/', !dashboardRoute));
 
     if (dashboard) {
       breadcrumbs.push(createBreadcrumb(dashboard.id, dashboard.route, true));
@@ -38,8 +34,11 @@ export default function Breadcrumbs() {
     <Breadcrumb
       separator={<ChevronRightIcon color='gray.500' />}
       spacing='8px'
-      pb='s'
+      pb='1em'
     >
+      <BreadcrumbItem>
+        <Text>{cm('opsConsole')}</Text>
+      </BreadcrumbItem>
       {createBreadcrumbs()}
     </Breadcrumb>
   );

@@ -1,5 +1,4 @@
 import { Box, Flex } from '@chakra-ui/react';
-// import { Footer } from 'components/common/Footer';
 import Navbar from 'ops-frontend/components/layout/navbar';
 import Head from 'next/head';
 import React from 'react';
@@ -18,14 +17,13 @@ export function AppLayout (props: LayoutProps) {
   return (
     <Box h="100vh" className={inter.className}>
       <Head>
-        <title>TinyStacks</title>
-        <meta name="description" content="Code to cloud in minutes" />
+        <title>OpsCOnsole</title>
+        <meta name="description" content="The developer portal for cloud operations" />
         <link rel="icon" href="/iconv2.svg" />
       </Head>
       <Flex flexDirection="column" h="100vh" minWidth="sm" overflow="auto" className='app'>
         <Navbar />
         {props.children}
-        {/* <Footer /> */}
       </Flex>
     </Box>
   );

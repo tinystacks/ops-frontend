@@ -2,7 +2,7 @@ import { selectDashboards, updateConsole } from 'ops-frontend/store/consoleSlice
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Heading, Wrap } from '@chakra-ui/react';
+import { Button, Flex, Heading, Spacer, Wrap } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { DashboardCard } from 'ops-frontend/components/dashboard/dashboard-card';
 
 export function DashboardList () {
-  const { t: cm } = useTranslation('common');
+  const { t: hm } = useTranslation('home');
   const dashboards = useAppSelector(selectDashboards);
   const dispatch = useAppDispatch();
 
@@ -34,13 +34,15 @@ export function DashboardList () {
 
   function renderHeader() {
     return (
-      <>
-        <Heading>{cm('dashboard')}s</Heading>
+      <Flex>
+        <Heading>{hm('dashboards')}</Heading>
+        <Spacer />
+        <Button colorScheme='blue'>{hm('addDashboard')}</Button>
         {/* TODO: ACTIONS */}
         {/* <button> */}
         {/* {common('settings')} */}
         {/* </button> */}
-      </>
+      </Flex>
     );
   }
 
@@ -58,7 +60,7 @@ export function DashboardList () {
         {renderHeader()}
       </HeaderLayout>
       <FullpageLayout>
-        <Wrap data-testid='console-page-contents' spacing="6" pt="6" maxWidth="7xl">
+        <Wrap data-testid='console-page-contents' spacing="6" maxWidth="7xl">
           {cards}
         </Wrap>
       </FullpageLayout>
