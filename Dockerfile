@@ -14,6 +14,7 @@ COPY . .
 RUN mv ./.npmrc ./.npmrc.dev
 RUN mv ./.npmrc.prod ./.npmrc
 RUN npm ci
+RUN npm run create-env
 RUN npm run build
 # RUN rm -rf ./src
 # Uncomment once core-plugins repo exists and is installable
