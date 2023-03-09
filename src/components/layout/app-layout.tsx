@@ -17,7 +17,7 @@ export function AppLayout (props: LayoutProps) {
   return (
     <Box h="100vh" className={inter.className}>
       <Head>
-        <title>OpsCOnsole</title>
+        <title>OpsConsole</title>
         <meta name="description" content="The developer portal for cloud operations" />
         <link rel="icon" href="/iconv2.svg" />
       </Head>
