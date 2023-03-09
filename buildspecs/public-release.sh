@@ -28,6 +28,13 @@ docker image tag "$ecrImageUrl:$sourceTag-x86" "$publicEcrImageUrl:$x86Tag";
 armTag="$version-arm";
 docker image tag "$ecrImageUrl:$sourceTag-arm" "$publicEcrImageUrl:$armTag";
 
+if [ "$version" != "latest" ]
+  then
+    # Push latest-arch images
+    docker image tag "$ecrImageUrl:$sourceTag-x86" "$publicEcrImageUrl:latest-x86";
+    docker image tag "$ecrImageUrl:$sourceTag-arm" "$publicEcrImageUrl:latest-arm";
+fi
+
 docker push $publicEcrImageUrl --all-tags;
 
 # Create public manifest
