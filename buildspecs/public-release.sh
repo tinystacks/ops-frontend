@@ -8,7 +8,7 @@ appName=$(cat ./package.json | jq -r .name);
 region="${AWS_REGION:-us-east-1}";
 ecrEndpoint="${accountId}.dkr.ecr.${region}.amazonaws.com";
 ecrImageUrl="${ecrEndpoint}/${appName}";
-publicEcrEndpoint="public.ecr.aws/tinystacks/";
+publicEcrEndpoint="public.ecr.aws/tinystacks";
 publicEcrImageUrl="${publicEcrEndpoint}/${appName}";
 
 # Log in to Dev private registry
