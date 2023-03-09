@@ -39,8 +39,8 @@ class PublicRelease extends Construct {
           'Linux'
         ],
         // 'logoUrl': 'https://d3g9o9u8re44ak.cloudfront.net/logo/6b353252-f327-4419-8c9a-4be8eb8f7ad5/5c70ebc2-2eab-489b-9722-f83e7bc2deb1.png',
-        'AboutText': fs.readFileSync(path.resolve(__dirname, '../../ABOUT.md')),
-        'UsageText': fs.readFileSync(path.resolve(__dirname, '../../USAGE.md'))
+        'AboutText': fs.readFileSync(path.resolve(__dirname, '../../ABOUT.md')).toString(),
+        'UsageText': fs.readFileSync(path.resolve(__dirname, '../../USAGE.md')).toString()
       }
     });
 
