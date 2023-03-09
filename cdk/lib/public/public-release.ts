@@ -30,7 +30,7 @@ class PublicRelease extends Construct {
     const publicEcrRepo = new CfnPublicRepository(this, constructId(name, 'publicEcrRepo'), {
       repositoryName: name,
       repositoryCatalogData: {
-        'Description': 'Open source version of the ops-console-frontend.',
+        'RepositoryDescription': 'Open source version of the ops-console-frontend.',
         'Architectures': [
           'ARM 64',
           'x86-64'
