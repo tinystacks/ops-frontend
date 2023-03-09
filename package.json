@@ -1,6 +1,6 @@
 {
   "name": "ops-frontend",
-  "version": "0.0.5-release",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tinystacks/ops-frontend.git"
@@ -31,10 +31,10 @@
     "@next/bundle-analyzer": "^13.1.6",
     "@next/font": "^13.1.6",
     "@reduxjs/toolkit": "^1.9.2",
-    "@tinystacks/ops-aws-core-plugins": "0.0.4-release",
-    "@tinystacks/ops-core": "0.0.5-release",
-    "@tinystacks/ops-core-widgets": "0.0.4-release",
-    "@tinystacks/ops-model": "0.0.5-release",
+    "@tinystacks/ops-aws-core-plugins": "^0.0.0",
+    "@tinystacks/ops-core": "^0.0.0",
+    "@tinystacks/ops-core-widgets": "^0.0.0",
+    "@tinystacks/ops-model": "^0.0.0",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
     "@types/react-dom": "18.0.10",
