@@ -7,6 +7,7 @@
   },
   "scripts": {
     "create-env": "rm -rf ./.env.local; echo \"API_ENDPOINT=http://localhost:8000\" > ./.env.local",
+    "create-docker-env": "rm -rf ./.env.local; echo \"API_ENDPOINT=http://ops-api:8000\" > ./.env.local",
     "docker-dev": "bash ./dev.sh",
     "docker-staging": "bash ./staging.sh",
     "dev": "npm run create-env && next dev",
