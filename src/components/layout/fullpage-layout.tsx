@@ -4,7 +4,7 @@ import React from 'react';
 export function FullpageLayout(props: { children?: React.ReactNode }) {
   const boxBg = useColorModeValue('gray.100', 'gray.900');
   return (
-    <Box bg={boxBg} py="4" shadow="sm" style={{ width: '100%' }}{...props}>
+    <Box bg={boxBg} py="4" shadow="sm" style={{ width: '100%', padding: '20px 60px' }}{...props}>
       <Container maxW="7xl">
         {props.children}
       </Container>
