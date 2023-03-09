@@ -1,6 +1,6 @@
 {
   "name": "ops-frontend",
-  "version": "0.0.5-release",
+  "version": "0.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tinystacks/ops-frontend.git"
