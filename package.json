@@ -1,5 +1,5 @@
 {
-  "name": "@tinystacks/ops-frontend",
+  "name": "ops-frontend",
   "version": "0.0.5-release",
   "repository": {
     "type": "git",
