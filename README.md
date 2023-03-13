@@ -1,38 +1,42 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Introduction
 
-## Getting Started
+This package contains code for the frontend of the TinyStacks OpsConsole project. If you are looking for a quick way to run the OpsConsole, please look at the [Ops CLI](https://github.com/tinystacks/ops-cli) for installation and usage instructions.
 
-First, run the development server:
+# Usage 
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+npm i;
+npm run dev;
 ```
+In order for this to work, you need to have the [API](https://github.com/tinystacks/ops-api) running locally on port 8000.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+# Architecture
+## Frameworks
+This frontend package is built on React, Redux, and Next.js. It uses component libraries from [Chakra](https://chakra-ui.com) and [rsuite](https://rsuitejs.com/).
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Data flow
+After launching the Ops Console Frontend and navigating to any root path, the GetConsoles api is requested. This returns a Console object that includes providers, dependencies, widgets, dahboards, and console details.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### Paths
+There are 2 main paths:
+1. `/`: This route uses the requested console to list all available dashboards as links.
+2. `/[dashboard-route]`: This route fetches all widgets and renders them in a dashboard view.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Widget data flow
+When a /[dashboard-route] request is made, a few things happen with regards to widgets
 
-## Learn More
+1. A full widget render tree is created. This includes widgets directly and transitively referenced by the selected dashboard
+2. The getWidget API is recursively requested for each widget in the render tree, leaf-widgets-first. Ops-API processes these requests by calling getData on each widget and returning a serialized populated widget object to the frontend
+3. The frontend deserializes each widget by calling Widget.fromJson.
+4. Each widget's render function is invoked and layed out according to the dashboard.
+Note that only widgets directly and trasitively referenced by the selected dashboard are requested and rendered. Other widgets will not call getData until they are in context of a requested dashboard
 
-To learn more about Next.js, take a look at the following resources:
+# How it works with the API
+Please see the [README.md in ops-core](https://github.com/tinystacks/ops-core/blob/main/README.md).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Plugins
+For an overview of plugins, please see [PLUGINS.md in ops-core](https://github.com/tinystacks/ops-core/blob/main/PLUGINS.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Developing plugins
+Please see [DEVELOPING_PLUGINS.md in ops-core](https://github.com/tinystacks/ops-core/blob/main/DEVELOPING_PLUGINS.md).
