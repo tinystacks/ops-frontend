@@ -24,7 +24,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
   const { hydratedWidget, widget, childrenWidgets } = props;
 
   function updateOverrides (overrides: any) {
-    void apis.getWidget(consoleName, widget, overrides)
+    void apis.getWidget(consoleName, widget, JSON.stringify(overrides))
       .then(w => dispatch(updateHydratedWidget(w)));
   };
 
