@@ -21,11 +21,17 @@ import {
 import { RemovalPolicy } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { name } from '../../../package.json';
-import { CfnPublicRepository } from 'aws-cdk-lib/aws-ecr';
+import { CfnPublicRepository, Repository } from 'aws-cdk-lib/aws-ecr';
+
+interface PublicReleaseProps {
+  privateEcrRepo: Repository
+}
 
 class PublicRelease extends Construct {
-  constructor (scope: Construct) {
+  constructor (scope: Construct, props: PublicReleaseProps) {
     super(scope, 'PublicRelease');
+
+    const { privateEcrRepo } = props;
 
     const publicEcrRepo = new CfnPublicRepository(this, constructId(name, 'publicEcrRepo'), {
       repositoryName: name,
@@ -101,6 +107,17 @@ class PublicRelease extends Construct {
         'sts:GetCallerIdentity'
       ],
       resources: ['*']
+    }));
+    codebuildProject.addToRolePolicy(new PolicyStatement({
+      actions: [
+        'ecr:BatchCheckLayerAvailability',
+        'ecr:CompleteLayerUpload',
+        'ecr:InitiateLayerUpload',
+        'ecr:ListImages',
+        'ecr:PutImage',
+        'ecr:UploadLayerPart'
+      ],
+      resources: [privateEcrRepo.repositoryArn]
     }));
     codebuildProject.addToRolePolicy(new PolicyStatement({
       actions: [

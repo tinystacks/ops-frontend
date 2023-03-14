@@ -11,6 +11,7 @@ import { DevBuild } from './dev-build';
 import { DevRelease } from './dev-release';
 
 class DevPipeline extends Construct {
+  privateEcrRepo: Repository;
   constructor (scope: Construct) {
     super(scope, 'DevPipeline');
 
@@ -23,6 +24,7 @@ class DevPipeline extends Construct {
       tagStatus: TagStatus.UNTAGGED,
       maxImageCount: 25 
     });
+    this.privateEcrRepo = ecrRepo;
 
     const release = new DevRelease(this, constructId('devRelease'), {
       ecrRepo

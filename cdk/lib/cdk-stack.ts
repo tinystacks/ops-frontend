@@ -7,7 +7,9 @@ export class CdkStack extends cdk.Stack {
   constructor (scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    new DevPipeline(this);
-    new PublicRelease(this);
+    const devPipeline = new DevPipeline(this);
+    new PublicRelease(this, {
+      privateEcrRepo: devPipeline.privateEcrRepo
+    });
   }
 }
