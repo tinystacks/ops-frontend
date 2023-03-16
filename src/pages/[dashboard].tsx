@@ -185,7 +185,7 @@ async function renderWidget(
 
   let imported;
   if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
-    imported = await import('@tinystacks/ops-aws-core-plugins');
+    imported = await import('@tinystacks/ops-aws-core-widgets');
   } else {
     imported = await import('@tinystacks/ops-core-widgets');
   }
