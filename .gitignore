@@ -4,3 +4,4 @@ coverage
 .swc
 .vscode
 .env*
+.local-dependencies

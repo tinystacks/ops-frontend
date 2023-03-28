@@ -12,7 +12,6 @@ WORKDIR /app
 COPY . .
 
 RUN npm ci
-RUN npm run create-docker-env
 RUN npm run build
 # RUN rm -rf ./src
 RUN npm prune --production
