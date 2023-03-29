@@ -18,4 +18,5 @@ fi
 mkdir -p ../dependencies;
 depDir=$(cd ../dependencies; pwd);
 npm i --silent --prefix $depDir $dependencies --@tinystacks:registry=https://registry.npmjs.org;
+node ./generate-plugins-index.js $dependencies;
 echo "$depDir"

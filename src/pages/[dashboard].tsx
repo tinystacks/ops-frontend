@@ -20,7 +20,7 @@ import { Widget } from '@tinystacks/ops-model';
 import { FlatMap, WidgetMap } from 'ops-frontend/types';
 import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
 // @ts-ignore
-import * as plugins from 'ops-frontend/dependencies'; // eslint-disable-line import/no-unresolved
+import * as plugins from 'ops-frontend/plugins'; // eslint-disable-line import/no-unresolved
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
