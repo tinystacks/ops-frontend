@@ -183,13 +183,22 @@ async function renderWidget(
   // return imported[widget.type].fromJson(widget).render(children);
   // }
 
-  let imported;
+  let moduleName;
   if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
-    imported = await import('@tinystacks/ops-aws-core-widgets');
+    moduleName = '@tinystacks/ops-aws-core-widgets';
   } else {
-    imported = await import('@tinystacks/ops-core-widgets');
+    moduleName = '@tinystacks/ops-core-widgets';
   }
-    return <WrappedWidget
+  const imported = await import(
+    /* webpackInclude: /\.js\.json$/ */
+    /* webpackChunkName: "ops-plugins" */
+    /* webpackMode: "eager" */
+    /* webpackPrefetch: true */
+    /* webpackPreload: true */
+    `../../../dependencies/node_modules/${moduleName}`
+  );
+  return <WrappedWidget
+    key={widget.id}
     // @ts-ignore
     hydratedWidget={imported[widget.type].fromJson(widget)}
     widget={widget}

@@ -8,7 +8,7 @@
   "scripts": {
     "docker-dev": "bash ./dev.sh",
     "docker-staging": "bash ./staging.sh",
-    "dev": "bash ./local.sh && next dev",
+    "dev": "bash ./local.sh && NODE_OPTIONS='--max_old_space_size=8000' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
