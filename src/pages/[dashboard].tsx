@@ -190,19 +190,19 @@ async function renderWidget(
   // return imported[widget.type].fromJson(widget).render(children);
   // }
 
-  // let imported;
-  // if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
-    /* eslint-disable import/no-unresolved */
+  /*
+  let plugin;
+  if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
     // @ts-ignore 
-    // imported = await import('@tinystacks/ops-aws-core-widgets');
-  // } else {
-    // moduleName = '@tinystacks/ops-core-widgets';
+    plugin = await import('@tinystacks/ops-aws-core-widgets'); // eslint-disable-line import/no-unresolved
+  } else {
     // @ts-ignore
-    /* eslint-enable import/no-unresolved */
-  // }
+    plugin = await import('@tinystacks/ops-core-widgets'); // eslint-disable-line import/no-unresolved
+  }
+  */
   const moduleName = dependencies[widget.type];
   const moduleNamespace = camelCase(moduleName);
-  const plugin = plugins[moduleNamespace] as any;
+  const plugin = (plugins as any)[moduleNamespace] as any;
   return <WrappedWidget
     key={widget.id}
     // @ts-ignore

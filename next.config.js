@@ -8,13 +8,22 @@ const nextConfig = {
     config,
     { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
   ) => {
-    const { resolve = {} } = config || {};
-    const { alias = [], modules = [] } = resolve;
+    const {
+      resolve = {},
+      resolveLoader = {}
+    } = config || {};
+    const {
+      modules: resolveModules = []
+    } = resolve;
+    const { modules: resolveLoaderModules = [] } = resolveLoader;
     
     const dependenciesPath = path.resolve(__dirname, '../dependencies/node_modules/')
 
-    modules.push(dependenciesPath);
-    resolve.modules = modules;
+    resolveModules.push(dependenciesPath);
+    resolve.modules = resolveModules;
+    
+    resolveLoaderModules.push(dependenciesPath);
+    resolveLoader.modules = resolveLoaderModules;
 
     const newConfig = {
       ...config,
