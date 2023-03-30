@@ -4,10 +4,15 @@ const camelCase = require('lodash.camelcase');
 
 const processArgs = [...process.argv];
 const dependencies = processArgs.slice(2);
-const importStatements = dependencies.map((dependency) => {
+
+const importStatements = dependencies?.map((dependency) => {
   const moduleNamespace = camelCase(dependency);
   return `export * as ${moduleNamespace} from '${dependency}';`;
 });
+
+if (importStatements.length === 0) {
+  importStatements.push('export {};');
+}
 
 const eslintDisable = '/* eslint-disable import/no-unresolved */';
 const tsNoCheck = '// @ts-nocheck';
