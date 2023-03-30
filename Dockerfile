@@ -14,7 +14,8 @@ WORKDIR /app
 COPY . .
 
 RUN npm ci
-RUN if [ ! -z "${DEPENDENCIES}" ]; then npm i $DEPENDENCIES; node ./generate-plugins-index.js $DEPENDENCIES; else bash ./stub-plugins.sh; fi;
+RUN if [ ! -z "${DEPENDENCIES}" ]; then npm i $DEPENDENCIES; fi;
+RUN node ./generate-plugins-index.js $DEPENDENCIES;
 RUN npm run build
 # RUN rm -rf ./src
 RUN npm prune --production
