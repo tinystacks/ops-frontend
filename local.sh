@@ -1,7 +1,9 @@
 #!/bin/bash
 
 ## Install runtime dependencies
-depDir=$(bash ./install-runtime-dependencies.sh);
+dependencies=$(bash ./get-runtime-dependencies.sh);
+npm i --no-save --silent $dependencies --@tinystacks:registry=https://registry.npmjs.org;
+node ./generate-plugins-index.js $dependencies;
 
 ## Setup environment variables
 rm -rf ./.env.local;

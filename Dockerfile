@@ -6,12 +6,15 @@ ARG NPM_TOKEN
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV}
 ENV PORT=3000
+ARG DEPENDENCIES
+ENV DEPENDENCIES=${DEPENDENCIES}
 
 WORKDIR /app
 
 COPY . .
 
 RUN npm ci
+RUN if [ ! -z "${DEPENDENCIES}" ]; then npm i $DEPENDENCIES; node ./generate-plugins-index.js $DEPENDENCIES; else bash ./stub-plugins.sh; fi;
 RUN npm run build
 # RUN rm -rf ./src
 RUN npm prune --production

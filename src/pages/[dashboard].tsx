@@ -19,8 +19,6 @@ import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { Widget } from '@tinystacks/ops-model';
 import { FlatMap, WidgetMap } from 'ops-frontend/types';
 import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
-// @ts-ignore
-import * as plugins from 'ops-frontend/plugins'; // eslint-disable-line import/no-unresolved
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
@@ -182,24 +180,8 @@ async function renderWidget(
   children: (Widget & { renderedElement: JSX.Element })[],
   dependencies: FlatMap
 ): Promise<JSX.Element> {
-  // if (!isEmpty(widget.childrenIds)) {
-  // const imported = await import('@tinystacks/ops-core-widgets');
-  // const imported = await import(dependencies[widget.type]);
-
-  // @ts-ignore
-  // return imported[widget.type].fromJson(widget).render(children);
-  // }
-
-  /*
-  let plugin;
-  if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
-    // @ts-ignore 
-    plugin = await import('@tinystacks/ops-aws-core-widgets'); // eslint-disable-line import/no-unresolved
-  } else {
-    // @ts-ignore
-    plugin = await import('@tinystacks/ops-core-widgets'); // eslint-disable-line import/no-unresolved
-  }
-  */
+ // @ts-ignore
+  const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
   const moduleName = dependencies[widget.type];
   const moduleNamespace = camelCase(moduleName);
   const plugin = (plugins as any)[moduleNamespace] as any;
