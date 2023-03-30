@@ -25,7 +25,6 @@ docker container stop $appName || true;
 docker container rm $appName || true;
 docker run --name $appName \
   -v $HOME/.aws:/root/.aws \
-  -v $depDir:/dependencies \
   -it \
   -p 3000:3000 \
   --env-file ./.env.staging \
