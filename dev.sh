@@ -24,7 +24,6 @@ docker container rm $appName || true;
 docker run --name $appName \
   -it \
   -p 3000:3000 \
-  -v $depDir:/dependencies \
   --env-file ./.env.dev \
   --network=ops-console \
   "$appName:$version";
