@@ -48,8 +48,8 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
               variant='outline'
             />
             <MenuList className='dropdown'>
-              <EditWidgetModal console={consoleName} widgetId={widget.id} />
-              <DeleteWidgetModal console={consoleName} widget={widget} />
+              <EditWidgetModal key={`${widget.id}-edit`} console={consoleName} widgetId={widget.id} />
+              <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget} />
             </MenuList>
           </Menu>
         </Box>

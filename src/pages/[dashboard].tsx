@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import isEqual from 'lodash.isequal';
+import camelCase from 'lodash.camelcase';
 import apis from 'ops-frontend/utils/apis';
 import WrappedWidget from 'ops-frontend/components/widget/wrapped-widget';
 import { useRouter } from 'next/router'
@@ -16,7 +17,7 @@ import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { Widget } from '@tinystacks/ops-model';
-import { WidgetMap } from 'ops-frontend/types';
+import { FlatMap, WidgetMap } from 'ops-frontend/types';
 import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
 
 // A dashboard consists of
@@ -53,7 +54,7 @@ function Dashboard() {
     async function importAndRenderWidgets() {
       const deepRenderedWidgets = { ...renderedWidgets };
       for (let widget of dashboardWidgets) {
-        deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(widget, hydratedWidgets);
+        deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(widget, hydratedWidgets, dependencies);
       }
 
       setRenderedWidgets(deepRenderedWidgets);
@@ -151,11 +152,13 @@ function usePreviousValue(value: any) {
 }
 
 async function renderWidgetAndChildren(
-  widget: Widget, hydratedWidgets: WidgetMap
+  widget: Widget,
+  hydratedWidgets: WidgetMap,
+  dependencies: FlatMap
 ): Promise<JSX.Element> {
   const { childrenIds } = widget;
   if (!childrenIds || isEmpty(childrenIds)) {
-    return await renderWidget(widget, []);
+    return await renderWidget(widget, [], dependencies);
   }
 
   // TODO: Throw if missing
@@ -165,33 +168,27 @@ async function renderWidgetAndChildren(
   for (const child of children) {
     renderedChildren.push({
       ...widget,
-      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets)
+      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets, dependencies)
     });
   }
 
-  return await renderWidget(widget, renderedChildren);
+  return await renderWidget(widget, renderedChildren, dependencies);
 }
 
 async function renderWidget(
-  widget: Widget, children: (Widget & { renderedElement: JSX.Element })[]
+  widget: Widget,
+  children: (Widget & { renderedElement: JSX.Element })[],
+  dependencies: FlatMap
 ): Promise<JSX.Element> {
-  // if (!isEmpty(widget.childrenIds)) {
-  // const imported = await import('@tinystacks/ops-core-widgets');
-  // const imported = await import(dependencies[widget.type]);
-
-  // @ts-ignore
-  // return imported[widget.type].fromJson(widget).render(children);
-  // }
-
-  let imported;
-  if (widget.type.toLowerCase().startsWith('aws') || widget.type === 'JsonTree') {
-    imported = await import('@tinystacks/ops-aws-core-widgets');
-  } else {
-    imported = await import('@tinystacks/ops-core-widgets');
-  }
-    return <WrappedWidget
+ // @ts-ignore
+  const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
+  const moduleName = dependencies[widget.type];
+  const moduleNamespace = camelCase(moduleName);
+  const plugin = (plugins as any)[moduleNamespace] as any;
+  return <WrappedWidget
+    key={widget.id}
     // @ts-ignore
-    hydratedWidget={imported[widget.type].fromJson(widget)}
+    hydratedWidget={plugin[widget.type].fromJson(widget)}
     widget={widget}
     childrenWidgets={children}
   />;

@@ -6,13 +6,16 @@ ARG NPM_TOKEN
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV}
 ENV PORT=3000
+ARG DEPENDENCIES
+ENV DEPENDENCIES=${DEPENDENCIES}
 
 WORKDIR /app
 
 COPY . .
 
 RUN npm ci
-RUN npm run create-docker-env
+RUN if [ ! -z "${DEPENDENCIES}" ]; then npm i $DEPENDENCIES; fi;
+RUN node ./generate-plugins-index.js $DEPENDENCIES;
 RUN npm run build
 # RUN rm -rf ./src
 RUN npm prune --production

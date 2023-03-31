@@ -4,3 +4,5 @@ coverage
 .swc
 .vscode
 .env*
+.local-dependencies
+src/plugins.ts
