@@ -1,15 +1,30 @@
 import { OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
+import { GetWidgetArguments } from 'ops-frontend/types';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
 // This file mostly exists to make testing easy
 const client = new OpsApiClient({ BASE: '/api' });
 const apis = {
-  async getWidget(consoleName: string, widget: Widget, overrides?: any): Promise<Widget> {
+  async getWidget(args: GetWidgetArguments): Promise<Widget> {
+    const {
+      consoleName,
+      widget,
+      overrides,
+      dashboardId,
+      parameters
+    } = args;
+    
     // We want this to be synchronous so that we're not overwriting state inconsistently
     // Later, we can batch requests + writes to state for better performance
 
     return parseWidgetResult(
-      await client.widget.getWidget(consoleName, widget.id, overrides).catch(e => e.message),
+      await client.widget.getWidget(
+        consoleName,
+        widget.id,
+        overrides,
+        JSON.stringify(parameters),
+        dashboardId
+      ).catch(e => e.message),
       widget
     );
   },

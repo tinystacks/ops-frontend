@@ -9,14 +9,25 @@ import apis from 'ops-frontend/utils/apis';
 import { selectWidget, updateHydratedWidget, updateWidget } from 'ops-frontend/store/consoleSlice';
 import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
 import { useSelector } from 'react-redux';
+import { Json } from 'ops-frontend/types';
 
-export default function EditWidgetModal(props: { console: string, widgetId: string }) {
+export default function EditWidgetModal(props: {
+  console: string;
+  widgetId: string;
+  dashboardId?: string;
+  parameters?: Json;
+}) {
   // i18n
   const { t: commonMsg } = useTranslation('common');
   const { t: widgetMsg } = useTranslation('widget');
 
   // props
-  const { console, widgetId } = props;
+  const {
+    console,
+    widgetId,
+    dashboardId,
+    parameters
+  } = props;
 
   // redux
   const dispatch = useAppDispatch();
@@ -39,7 +50,12 @@ export default function EditWidgetModal(props: { console: string, widgetId: stri
     try {
       const updatedWidget = await apis.updateWidget(console, widget.id, JSON.parse(value));
       dispatch(updateWidget(updatedWidget));
-      const hydratedUpdatedWidget = await apis.getWidget(console, widget);
+      const hydratedUpdatedWidget = await apis.getWidget({
+        consoleName: console,
+        widget,
+        dashboardId,
+        parameters
+      });
       dispatch(updateHydratedWidget(hydratedUpdatedWidget));
     } catch (e) {
       setError(widget.id);

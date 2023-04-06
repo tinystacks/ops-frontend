@@ -9,11 +9,15 @@ import { BaseWidget } from '@tinystacks/ops-core';
 import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
+import { Json } from 'ops-frontend/types';
+
 
 export type WrappedWidgetProps = {
   hydratedWidget: BaseWidget,
   widget: Widget,
-  childrenWidgets: (Widget & { renderedElement: JSX.Element })[]
+  childrenWidgets: (Widget & { renderedElement: JSX.Element })[],
+  dashboardId?: string,
+  parameters?: Json
 };
 
 export default function WrappedWidget(props: WrappedWidgetProps) {
@@ -21,10 +25,22 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
   const dispatch = useAppDispatch();
   const consoleName = useAppSelector(selectConsoleName);
   // props
-  const { hydratedWidget, widget, childrenWidgets } = props;
+  const {
+    hydratedWidget,
+    widget,
+    childrenWidgets,
+    dashboardId,
+    parameters
+  } = props;
 
   function updateOverrides (overrides: any) {
-    void apis.getWidget(consoleName, widget, JSON.stringify(overrides))
+    void apis.getWidget({
+      consoleName,
+      widget,
+      overrides: JSON.stringify(overrides),
+      dashboardId,
+      parameters
+    })
       .then(w => dispatch(updateHydratedWidget(w)));
   };
 
@@ -48,7 +64,13 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
               variant='outline'
             />
             <MenuList className='dropdown'>
-              <EditWidgetModal key={`${widget.id}-edit`} console={consoleName} widgetId={widget.id} />
+              <EditWidgetModal
+                key={`${widget.id}-edit`}
+                console={consoleName}
+                widgetId={widget.id}
+                dashboardId={dashboardId}
+                parameters={parameters}
+              />
               <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget} />
             </MenuList>
           </Menu>
