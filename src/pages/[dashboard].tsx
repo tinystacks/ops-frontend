@@ -190,7 +190,7 @@ async function renderWidget(
     {
       ...widget,
       originalType: widget.type,
-      error: (widget as TinyStacksError).message || `Error Loading Widget ${widget.id}`
+      error: (widget as TinyStacksError).message || ''
     }
   )
  } else { 
