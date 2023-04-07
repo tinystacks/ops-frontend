@@ -16,9 +16,10 @@ import { useEffect, useRef } from 'react';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { Widget } from '@tinystacks/ops-model';
+import { TinyStacksError, Widget } from '@tinystacks/ops-model';
 import { FlatMap, WidgetMap } from 'ops-frontend/types';
 import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
+import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
@@ -180,15 +181,30 @@ async function renderWidget(
   children: (Widget & { renderedElement: JSX.Element })[],
   dependencies: FlatMap
 ): Promise<JSX.Element> {
+
+  let hydratedWidget; 
  // @ts-ignore
+
+ if(widget.type === 'ErrorWidget'){ 
+  hydratedWidget = ErrorWidget.fromJson(
+    {
+      ...widget,
+      originalType: widget.type,
+      error: (widget as TinyStacksError).message || `Error Loading Widget ${widget.id}`
+    }
+  )
+ } else { 
   const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
   const moduleName = dependencies[widget.type];
   const moduleNamespace = camelCase(moduleName);
   const plugin = (plugins as any)[moduleNamespace] as any;
+  hydratedWidget = plugin[widget.type].fromJson(widget);
+ }
+
   return <WrappedWidget
     key={widget.id}
     // @ts-ignore
-    hydratedWidget={plugin[widget.type].fromJson(widget)}
+    hydratedWidget={hydratedWidget}
     widget={widget}
     childrenWidgets={children}
   />;
