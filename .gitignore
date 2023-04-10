@@ -6,3 +6,6 @@ coverage
 .env*
 .local-dependencies
 src/plugins.ts
+dist
+export-*.sh
+.DS_Store
