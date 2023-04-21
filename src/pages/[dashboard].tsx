@@ -20,6 +20,7 @@ import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
 import { FlatMap, Json, WidgetMap } from 'ops-frontend/types';
 import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
+import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
@@ -163,13 +164,18 @@ export async function fetchWidgetsForDashboard(args: {
 
   for (const widget of widgetsFetchList) {
     // TODO: dispatch a loading widget
-    const renderWidget = await apis.getWidget({
+    dispatch(updateHydratedWidget(new LoadingWidget({ ...widget, originalType: widget.type }).toJson()));
+    void apis.getWidget({
       consoleName,
       widget,
       dashboardId,
       parameters
-    });
-    dispatch(updateHydratedWidget(renderWidget));
+    }).then(renderWidget => dispatch(updateHydratedWidget(renderWidget)))
+    .catch((e: any) => dispatch(updateHydratedWidget(new ErrorWidget({
+      ...widget,
+      originalType: widget.type,
+      error: e.message
+    }).toJson())));
   }
 }
 
@@ -239,23 +245,26 @@ async function renderWidget(
 ): Promise<JSX.Element> {
 
   let hydratedWidget; 
- // @ts-ignore
-
- if(widget.type === 'ErrorWidget'){ 
-  hydratedWidget = ErrorWidget.fromJson(
-    {
+  if (widget.type === 'ErrorWidget') { 
+    hydratedWidget = ErrorWidget.fromJson(
+      {
+        ...widget,
+        originalType: widget.type,
+        error: (widget as TinyStacksError).message || ''
+      }
+    )
+  } else if (widget.type === 'LoadingWidget') {
+    hydratedWidget = LoadingWidget.fromJson({
       ...widget,
-      originalType: widget.type,
-      error: (widget as TinyStacksError).message || ''
-    }
-  )
- } else { 
-  const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
-  const moduleName = dependencies[widget.type];
-  const moduleNamespace = camelCase(moduleName);
-  const plugin = (plugins as any)[moduleNamespace] as any;
-  hydratedWidget = plugin[widget.type].fromJson(widget);
- }
+      originalType: widget.originalType
+    });
+  } else { 
+    const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
+    const moduleName = dependencies[widget.type];
+    const moduleNamespace = camelCase(moduleName);
+    const plugin = (plugins as any)[moduleNamespace] as any;
+    hydratedWidget = plugin[widget.type].fromJson(widget);
+  }
 
   return <WrappedWidget
     key={widget.id}
