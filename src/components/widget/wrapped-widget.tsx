@@ -10,6 +10,8 @@ import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/cons
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
 import { Json } from 'ops-frontend/types';
+import LoadingWidget from 'ops-frontend/widgets/loading-widget';
+import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
 
 export type WrappedWidgetProps = {
@@ -34,6 +36,10 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
   } = props;
 
   function updateOverrides (overrides: any) {
+    dispatch(updateHydratedWidget(new LoadingWidget({ 
+      ...widget,
+      originalType: widget.type,
+    }).toJson()));
     void apis.getWidget({
       consoleName,
       widget,
@@ -41,7 +47,14 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
       dashboardId,
       parameters
     })
-      .then(w => dispatch(updateHydratedWidget(w)));
+      .then(w => dispatch(updateHydratedWidget(w)))
+      .catch((e: any) =>
+        dispatch(updateHydratedWidget(new ErrorWidget({
+          ...widget,
+          originalType: widget.type,
+          error: e.message
+        }).toJson()))
+      );
   };
 
   // undefined display options default to true
