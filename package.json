@@ -16,6 +16,7 @@
     "test-cov": "jest --collect-coverage",
     "prepare": "husky install",
     "clean": "rm -rf node_modules | rm package-lock.json | rm -rf .next",
+    "clean-build": "npm run clean-install && npm run build",
     "clean-install": "npm run clean && npm i"
   },
   "dependencies": {
