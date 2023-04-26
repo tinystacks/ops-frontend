@@ -256,6 +256,7 @@ async function renderWidget(
   } else if (widget.type === 'LoadingWidget') {
     hydratedWidget = LoadingWidget.fromJson({
       ...widget,
+      // @ts-ignore
       originalType: widget.originalType
     });
   } else { 
