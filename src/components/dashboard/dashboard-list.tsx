@@ -2,7 +2,7 @@ import { selectDashboards, updateConsole } from 'ops-frontend/store/consoleSlice
 import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Button, Flex, Heading, Spacer, Wrap } from '@chakra-ui/react';
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Flex, Heading, Spacer, Wrap } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
@@ -38,7 +38,7 @@ export function DashboardList () {
       <Flex>
         <Heading>{hm('dashboards')}</Heading>
         <Spacer />
-        <Button colorScheme='blue'>{hm('addDashboard')}</Button>
+        {/* <Button colorScheme='blue'>{hm('addDashboard')}</Button> */}
         {/* TODO: ACTIONS */}
         {/* <button> */}
         {/* {common('settings')} */}
