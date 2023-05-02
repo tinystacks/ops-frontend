@@ -6,8 +6,9 @@ const processArgs = [...process.argv];
 const dependencies = processArgs.slice(2);
 
 const importStatements = dependencies?.map((dependency) => {
-  const moduleNamespace = camelCase(dependency);
-  return `export * as ${moduleNamespace} from '${dependency}';`;
+  const packageName = `@${dependency.split('@')?.at(1)}`;
+  const moduleNamespace = camelCase(packageName);
+  return `export * as ${moduleNamespace} from '${packageName}';`;
 });
 
 if (importStatements.length === 0) {
