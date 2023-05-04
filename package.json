@@ -32,7 +32,7 @@
     "@tinystacks/ops-core": "^0.0.4",
     "@tinystacks/ops-model": "^0.1.0",
     "@types/node": "18.11.18",
-    "@types/react": "18.0.27",
+    "@types/react": "18.0.35",
     "@types/react-dom": "18.0.10",
     "@types/webpack-env": "^1.18.0",
     "babel-jest": "^29.4.2",
