@@ -6,6 +6,7 @@ import { store } from 'ops-frontend/store/store';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import { AppLayout } from 'ops-frontend/components/layout/app-layout';
 import { extendTheme } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 
 export const PURPLE_GRADIENT = 'linear(to-r, lightpurple.500, purple.500)';
 export const PURPLE_GRADIENT_HOVER =
@@ -76,7 +77,7 @@ const theme = extendTheme({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
-  return (
+  const content = (
     <Provider store={store}>
       <ChakraProvider theme={theme}>
         <CSSReset />
@@ -86,4 +87,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </ChakraProvider>
     </Provider>
   );
+  const [render, setRender] = useState(false);
+  useEffect(() => setRender(true), []);
+  return render ? content : null;
 };
