@@ -18,7 +18,6 @@ import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
 import { FlatMap, Json, WidgetMap } from 'ops-frontend/types';
-// import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 import { useParams } from 'react-router-dom';
