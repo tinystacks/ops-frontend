@@ -8,6 +8,7 @@ export default function Home () {
     <Router>
       <Routes>
         <Route path="/dashboards/:route" element={<Dashboard />} />
+        {/* @ts-ignore */}
         <Route exact path="/dashboards" element={<DashboardList />} />
         <Route path="/" element={<DashboardList />} />
         <Route element={<NotFound />} />
