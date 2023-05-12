@@ -20,6 +20,7 @@ import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
 import { FlatMap, Json, WidgetMap } from 'ops-frontend/types';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
+// eslint-disable-next-line import/no-unresolved
 import { useParams } from 'react-router-dom';
 
 // A dashboard consists of

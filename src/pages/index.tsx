@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { DashboardList } from 'ops-frontend/components/dashboard/dashboard-list';
 import Dashboard from 'ops-frontend/components/dashboard/dashboard';

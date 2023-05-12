@@ -3,12 +3,18 @@ import { Box, HStack, Link, Stack, Text, Tooltip, useColorModeValue } from '@cha
 import { Dashboard } from '@tinystacks/ops-model';
 
 export function DashboardCard(props: { dashboard: Dashboard }) {
-  const { dashboard } = props;
+  const {
+    dashboard: {
+      id,
+      route,
+      description
+    } = {}
+  } = props;
   return (
     <Box
       as='section'
       bg={useColorModeValue('gray.100', 'inherit')}
-      id={`stack-card-${dashboard.id}`}
+      id={`stack-card-${id}`}
     >
       <Box maxW={{ base: 'xl', md: '7xl' }} mx='auto'>
         <Box
@@ -24,20 +30,19 @@ export function DashboardCard(props: { dashboard: Dashboard }) {
           <Stack justify='space-between' height='100%'>
             <Stack spacing='5px' h='full' px='6' py='4'>
               <HStack justify='space-between'>
-                <Link href={`dashboards/${dashboard.route}`}>
-                  <Tooltip label={dashboard.id}>
+                <Link href={`dashboards/${route}`}>
+                  <Tooltip label={id}>
                     <Text
                       noOfLines={1}
                       fontWeight='bold'
                       fontSize='lg'
                       maxW='200px'
                     >
-                      {dashboard.id}
+                      {id}
                     </Text>
                   </Tooltip>
                   <Text>
-                    {/* TODO: Add to model */}
-                    {/* {dashboard.description} */}
+                    {description}
                   </Text>
                 </Link>
               </HStack>
