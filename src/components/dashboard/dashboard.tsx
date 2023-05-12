@@ -18,9 +18,10 @@ import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
 import { FlatMap, Json, WidgetMap } from 'ops-frontend/types';
-import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
+// import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
+import { useParams } from 'react-router-dom';
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
@@ -29,11 +30,10 @@ function Dashboard() {
   const { t: common } = useTranslation('common');
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { dashboard: dashboardQuery } = router.query;
-  const dashboardRoute = dashboardQueryToDashboardRoute(dashboardQuery);
+  const { route = '' } = useParams();
 
   const consoleName = useAppSelector(selectConsoleName);
-  const dashboardId = useAppSelector(selectDashboardIdFromRoute(dashboardRoute));
+  const dashboardId = useAppSelector(selectDashboardIdFromRoute(route));
   const dashboard = useAppSelector(selectDashboard(dashboardId));
   const dashboardWidgets = useAppSelector(selectDashboardWidgets(dashboardId));
   const previousDashboardWidgets = usePreviousValue(dashboardWidgets);
@@ -171,11 +171,14 @@ export async function fetchWidgetsForDashboard(args: {
       dashboardId,
       parameters
     }).then(renderWidget => dispatch(updateHydratedWidget(renderWidget)))
-    .catch((e: any) => dispatch(updateHydratedWidget(new ErrorWidget({
-      ...widget,
-      originalType: widget.type,
-      error: e.message
-    }).toJson())));
+    .catch((e: any) => {
+      dispatch(updateHydratedWidget(new ErrorWidget({
+        ...widget,
+        originalType: widget.type,
+        error: e.message
+      }).toJson()))
+    }
+    );
   }
 }
 
@@ -243,9 +246,8 @@ async function renderWidget(
   dashboardId?: string,
   parameters?: Json
 ): Promise<JSX.Element> {
-
   let hydratedWidget; 
-  if (widget.type === 'ErrorWidget') { 
+  if (widget.type === 'ErrorWidget') {
     hydratedWidget = ErrorWidget.fromJson(
       {
         ...widget,

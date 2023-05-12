@@ -52,6 +52,7 @@
     "react": "18.2.0",
     "react-i18next": "^12.1.5",
     "react-redux": "^8.0.5",
+    "react-router-dom": "^6.11.1",
     "redux": "^4.2.1",
     "responsive-loader": "^3.1.2",
     "rsuite": "^5.28.0"
@@ -69,6 +70,7 @@
     "@types/lodash.isempty": "^4.4.7",
     "@types/lodash.isequal": "^4.4.7",
     "@types/react-redux": "^7.1.25",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "babel-preset-env": "^1.7.0",
     "eslint-config-prettier": "^8.6.0",
