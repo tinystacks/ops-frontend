@@ -14,6 +14,7 @@ export function DashboardList () {
   const dashboards = useAppSelector(selectDashboards);
   const dispatch = useAppDispatch();
   const [consolesError, setConsolesError] = useState<string | undefined>(undefined);
+  const [retryCount, setRetryCount] = useState<number>(0);
   async function fetchData() {
     try {
       setConsolesError(undefined);
@@ -21,17 +22,19 @@ export function DashboardList () {
       if (Array.isArray(consoles)) {
         // FIXME: we need to eventually only deal with a single console
         dispatch(updateConsole(consoles[0]));
+        setRetryCount(0);
       }
     } catch (e: any) {
       setConsolesError(e.message);
+      setRetryCount(retryCount + 1);
     }
   }
 
-  useEffect(function () {
-    if (isEmpty(dashboards)) {
+  useEffect(() => {
+    if (isEmpty(dashboards) && retryCount < 3) {
       void fetchData();
     }
-  });
+  }, [retryCount, dashboards]);
 
   function renderHeader() {
     return (

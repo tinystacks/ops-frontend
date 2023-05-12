@@ -13,6 +13,18 @@ const nextConfig = {
     }
 
     return config;
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/dashboards',
+        destination: '/',
+      },
+      {
+        source: '/dashboards/:any*',
+        destination: '/',
+      },
+    ];
   }
 }
 

@@ -24,7 +24,7 @@ export function DashboardCard(props: { dashboard: Dashboard }) {
           <Stack justify='space-between' height='100%'>
             <Stack spacing='5px' h='full' px='6' py='4'>
               <HStack justify='space-between'>
-                <Link href={dashboard.route}>
+                <Link href={`dashboards/${dashboard.route}`}>
                   <Tooltip label={dashboard.id}>
                     <Text
                       noOfLines={1}
