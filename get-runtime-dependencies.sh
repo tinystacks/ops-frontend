@@ -18,8 +18,6 @@ if [[ -z "$dependencies" ]];
     dependencies=$(<.local-dependencies);
 fi
 
-echo "$2"
-
 getNames=false
 while getopts "n" flag; do
   case "$flag" in
