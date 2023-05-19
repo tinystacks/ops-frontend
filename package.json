@@ -29,7 +29,7 @@
     "@next/bundle-analyzer": "^13.1.6",
     "@next/font": "^13.1.6",
     "@reduxjs/toolkit": "^1.9.2",
-    "@tinystacks/ops-core": "^0.2.0",
+    "@tinystacks/ops-core": "file:../ops-core/tinystacks-ops-core-0.2.0.tgz",
     "@tinystacks/ops-model": "^0.3.1",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
