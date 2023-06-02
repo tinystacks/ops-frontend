@@ -5,20 +5,14 @@ import { ShowableError, WidgetMap } from 'ops-frontend/types';
 import apis from 'ops-frontend/utils/apis';
 
 export const createNewDashboard = (consoleName: string, dashboard: Dashboard) => async (dispatch: AppDispatch) => {
-  await dispatch({
-    type: 'console/createTempDashboard',
-    payload: dashboard
-  });
+  await dispatch(createTempDashboard(dashboard));
 
   try {
     await apis.createDashboard(consoleName, dashboard);
     return dispatch(fetchConsoles(consoleName));
   } catch (e) {
     const error = (e as any).body as ApiError;
-    await dispatch({
-      type: 'console/removeTempDashboard',
-      payload: dashboard
-    });
+    await dispatch(removeTempDashboard(dashboard));
     return dispatch(handleError({
       title: 'Failed to create dashboard!',
       message: error?.body?.message || error?.message
@@ -43,11 +37,31 @@ export const fetchConsoles = (consoleName?: string) => async (dispatch: AppDispa
   }
 }
 
-export const handleError = (error: ShowableError) => async (dispatch: AppDispatch) => {
-  return dispatch({
-    type: 'console/handleError',
-    payload: error
-  });
+export const updateDashboard = (consoleName: string, dashboard: Dashboard, dashboardId?: string) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      await apis.updateDashboard(consoleName, dashboard, dashboardId);
+      return dispatch(fetchDashboards(consoleName));
+    } catch (e) {
+      const error = (e as any).body as ApiError;
+      return dispatch(handleError({
+        title: 'Failed to update dashboard!',
+        message: error?.body?.message || error?.message
+      }));
+    }
+  }
+
+export const fetchDashboards = (consoleName: string) => async (dispatch: AppDispatch) => {
+  try {
+    const dashboards = await apis.getDashboards(consoleName);
+    return dispatch(updateDashboards(dashboards || [] as Dashboard[]));
+  } catch (e) {
+    const error = (e as any).body as ApiError;
+    return dispatch(handleError({
+      title: 'Failed to fetch dashboards!',
+      message: error?.body?.message || error?.message
+    }));
+  }
 }
 
 type ConsoleSliceState = Console & {
@@ -145,6 +159,13 @@ export const consoleSlice = createSlice({
       const dashboard = action.payload;
       delete state.dashboards[dashboard.id];
       return state;
+    },
+    updateDashboards: function (state: ConsoleSliceState, action: PayloadAction<Dashboard[]>) {
+      state.dashboards = action.payload.reduce<Record<string, Dashboard>>((acc, dashboard) => {
+        acc[dashboard.id] = dashboard;
+        return acc;
+      }, {});
+      return state;
     }
   }
 });
@@ -156,7 +177,11 @@ export const {
   updateConsole,
   udpateWidgetOverrides,
   updateWidget,
-  dismissError
+  handleError,
+  dismissError,
+  createTempDashboard,
+  removeTempDashboard,
+  updateDashboards
 } = consoleSlice.actions;
 
 export function selectName(state: RootState) { return state.console.name };

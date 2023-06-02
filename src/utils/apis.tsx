@@ -56,9 +56,26 @@ const apis = {
   async createDashboard (consoleName: string, dashboard: Dashboard) {
     const newDashboard = await client.dashboard.createDashboard(consoleName, dashboard);
     try {
-      return newDashboard as Widget;
+      return newDashboard as Dashboard;
     } catch (e) {
       throw newDashboard as TinyStacksError;
+    }
+  },
+  async updateDashboard (consoleName: string, dashboard: Dashboard, dashboardId?: string) {
+    const id = dashboardId || dashboard.id;
+    const updatedDashboard = await client.dashboard.updateDashboard(consoleName, id, dashboard);
+    try {
+      return updatedDashboard as Dashboard;
+    } catch (e) {
+      throw updatedDashboard as TinyStacksError;
+    }
+  },
+  async getDashboards (consoleName: string) {
+    const dashboards = await client.dashboard.getDashboards(consoleName);
+    try {
+      return dashboards as Dashboard[];
+    } catch (e) {
+      throw dashboards as TinyStacksError;
     }
   }
 };

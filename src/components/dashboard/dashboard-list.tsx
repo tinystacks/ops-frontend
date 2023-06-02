@@ -65,7 +65,7 @@ export function DashboardList () {
   function renderHeader() {
     return (
       <Flex>
-        <Heading>{d('dashboards')}</Heading>
+        <Heading>{hm('dashboards')}</Heading>
         <Spacer />
         <Button colorScheme='blue' onClick={createOnOpen}>{d('addDashboard')}</Button>
       </Flex>
