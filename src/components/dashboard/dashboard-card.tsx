@@ -33,7 +33,7 @@ export function DashboardCard(props: { dashboard: Dashboard }) {
                 <Link href={`dashboards/${route}`}>
                   <Tooltip label={id}>
                     <Text
-                      noOfLines={1}
+                      noOfLines={2}
                       fontWeight='bold'
                       fontSize='lg'
                       maxW='200px'
