@@ -1,4 +1,4 @@
-import { OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
+import { Dashboard, OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
 import { GetWidgetArguments } from 'ops-frontend/types';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
@@ -52,6 +52,14 @@ const apis = {
   },
   async getConsoles() {
     return await client.console.getConsoles();
+  },
+  async createDashboard (consoleName: string, dashboard: Dashboard) {
+    const newDashboard = await client.dashboard.createDashboard(consoleName, dashboard);
+    try {
+      return newDashboard as Widget;
+    } catch (e) {
+      throw newDashboard as TinyStacksError;
+    }
   }
 };
 
