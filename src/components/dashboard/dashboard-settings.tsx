@@ -9,10 +9,11 @@ import {
   Input,
   Stack,
 } from '@chakra-ui/react';
-import { Dashboard } from '@tinystacks/ops-model';
+import { Dashboard, Parameter } from '@tinystacks/ops-model';
 import isEmpty from 'lodash.isempty';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ParameterInput from 'ops-frontend/components/dashboard/parameter-input';
 
 type ValidatedInputProps = {
   label: string;
@@ -78,7 +79,7 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   const [routeIsInvalid, setRouteIsInvalid] = useState<boolean>(false);
   const [routeError, setRouteError] = useState<string | undefined>(undefined);
   
-  // const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
+  const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
   
   const otherDashboards: Record<string, Dashboard> = Object.fromEntries(
     Object.entries(allDashboards)
@@ -133,6 +134,18 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
     }
   }
 
+  function updateParameter (key: string, value: any) {
+    let param = {} as Parameter;
+    const paramIndex = parameters.findIndex(p => p.name === key);
+    if (paramIndex !== -1) {
+      param = parameters.at(paramIndex) || param;
+      param = { ...param, default: value };
+      const updatedParams = [...parameters];
+      updatedParams[paramIndex] = param;
+      setParameters(updatedParams); 
+    }
+  }
+
   return (
     <Stack flex="1" direction={{ base: 'column' }} align="center" bgColor='gray.100'>
       <Stack
@@ -172,24 +185,45 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
               invalid={routeIsInvalid}
               error={routeError}
             />
-            <Flex justifyContent='flex-end' alignContent='end' h='full' paddingTop='5'>
-              <Button variant='ghost' onClick={onClose}>
-                {tc('close')}
-              </Button>
-              <Button
-                colorScheme='blue'
-                mr={3}
-                onClick={submit}
-                isDisabled={
-                  nameIsInvalid ||
-                  routeIsInvalid ||
-                  isEmpty(name) ||
-                  isEmpty(route)
-                }
-              >
-                {tc('save')}
-              </Button>
-            </Flex>
+            </Box>
+            <Box
+              p='4'
+              borderBottom='1px'
+              borderColor='gray.100'
+            >
+              <Heading as='h4' size='sm'>
+                {t('dashboardParameters')}
+              </Heading>
+            </Box>
+            <Box p='4'>
+              {parameters.map(param => (
+                <ParameterInput
+                  key={`${name}-param-${param.name}`}
+                  inputType={param.type || Parameter.type.STRING}
+                  label={param.name}
+                  propKey={param.name}
+                  value={param.default}
+                  setter={updateParameter}
+                />
+              ))}
+              <Flex justifyContent='flex-end' alignContent='end' h='full' paddingTop='5'>
+                <Button variant='ghost' onClick={onClose}>
+                  {tc('close')}
+                </Button>
+                <Button
+                  colorScheme='blue'
+                  mr={3}
+                  onClick={submit}
+                  isDisabled={
+                    nameIsInvalid ||
+                    routeIsInvalid ||
+                    isEmpty(name) ||
+                    isEmpty(route)
+                  }
+                >
+                  {tc('save')}
+                </Button>
+              </Flex>
           </Box>
         </Box>
       </Stack>
