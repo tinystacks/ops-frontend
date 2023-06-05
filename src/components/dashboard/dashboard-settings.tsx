@@ -70,13 +70,16 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   const { t } = useTranslation('dashboard');
   const { t: tc } = useTranslation('common');
 
-  const [dashboardName, setDashboardName] = useState<string>(dashboard.id);
-  const [dashboardRoute, setDashboardRoute] = useState<string>(dashboard.route);
-  const [dashboardNameIsInvalid, setDashboardNameIsInvalid] = useState<boolean>(false);
-  const [dashboardNameError, setDashboardError] = useState<string | undefined>(undefined);
+  const [name, setName] = useState<string>(dashboard.id);
+  const [nameIsInvalid, setNameIsInvalid] = useState<boolean>(false);
+  const [nameError, setNameError] = useState<string | undefined>(undefined);
+  
+  const [route, setRoute] = useState<string>(dashboard.route);
   const [routeIsInvalid, setRouteIsInvalid] = useState<boolean>(false);
   const [routeError, setRouteError] = useState<string | undefined>(undefined);
-
+  
+  // const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
+  
   const otherDashboards: Record<string, Dashboard> = Object.fromEntries(
     Object.entries(allDashboards)
       .filter(([id]) => id !== dashboard.id)
@@ -85,32 +88,33 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   function submit () {
     const updatedDashboard: Dashboard = {
       ...dashboard,
-      route: dashboardRoute
+      route,
+      parameters
     }
     updateDashboard(updatedDashboard);
   }
 
-  function updateDashboardName (dashboardName: string) {
-    setDashboardName(dashboardName);
+  function updateName (name: string) {
+    setName(name);
 
     const allowedCharacters = /[^a-zA-Z0-9]+/;
-    const nameIsInvalid = allowedCharacters.test(dashboardName);
+    const nameIsInvalid = allowedCharacters.test(name);
     if (nameIsInvalid) {
-      setDashboardNameIsInvalid(nameIsInvalid);
+      setNameIsInvalid(nameIsInvalid);
       const nameCharacterMessage = t('nameCharacterMessage');
-      setDashboardError(nameCharacterMessage);
-    } else if (otherDashboards[dashboardName]) {
-      setDashboardNameIsInvalid(true);
+      setNameError(nameCharacterMessage);
+    } else if (otherDashboards[name]) {
+      setNameIsInvalid(true);
       const uniqueMessage = t('uniqueMessage');
-      setDashboardError(uniqueMessage);
+      setNameError(uniqueMessage);
     } else {
-      setDashboardNameIsInvalid(false);
-      setDashboardError(undefined);
+      setNameIsInvalid(false);
+      setNameError(undefined);
     }
   }
   
-  function updateDashboardRoute (route: string) {
-    setDashboardRoute(route);
+  function updateRoute (route: string) {
+    setRoute(route);
     
     const allowedCharacters = /[^a-zA-Z0-9-]+/;
     const routeIsInvalid = allowedCharacters.test(route);
@@ -155,16 +159,16 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
           <Box p='4'>
             <ValidatedInput
               label={t('dashboardName')}
-              value={dashboardName}
-              onChange={updateDashboardName}
-              invalid={dashboardNameIsInvalid}
-              error={dashboardNameError}
+              value={name}
+              onChange={updateName}
+              invalid={nameIsInvalid}
+              error={nameError}
               disabled
             />
             <ValidatedInput
               label={t('dashboardRoute')}
-              value={dashboardRoute}
-              onChange={updateDashboardRoute}
+              value={route}
+              onChange={updateRoute}
               invalid={routeIsInvalid}
               error={routeError}
             />
@@ -177,10 +181,10 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
                 mr={3}
                 onClick={submit}
                 isDisabled={
-                  dashboardNameIsInvalid ||
+                  nameIsInvalid ||
                   routeIsInvalid ||
-                  isEmpty(dashboardName) ||
-                  isEmpty(dashboardRoute)
+                  isEmpty(name) ||
+                  isEmpty(route)
                 }
               >
                 {tc('save')}
