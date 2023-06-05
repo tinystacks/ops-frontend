@@ -35,6 +35,7 @@ export default function CreateDashboardModal(props: CreateDashboardModalProps) {
   const { t: tc } = useTranslation('common');
 
   const [dashboardName, setDashboardName] = useState<string>();
+  const [dashboardDescription, setDashboardDescription] = useState<string>();
   const [dashboardRoute, setDashboardRoute] = useState<string>();
   const [dashboardNameIsInvalid, setDashboardNameIsInvalid] = useState<boolean>(false);
   const [dashboardNameError, setDashboardError] = useState<string | undefined>(undefined);
@@ -45,6 +46,7 @@ export default function CreateDashboardModal(props: CreateDashboardModalProps) {
     const dashboard: Dashboard = {
       id: dashboardName!,
       route: dashboardRoute!,
+      description: dashboardDescription,
       widgetIds: []
     }
     createDashboard(dashboard);
@@ -121,6 +123,14 @@ export default function CreateDashboardModal(props: CreateDashboardModalProps) {
             isInvalid={routeIsInvalid}
           />
           <FormErrorMessage>{routeError}</FormErrorMessage>
+        </FormControl>
+        <FormControl>
+          <FormLabel>{t('dashboardDescription')}</FormLabel>
+          <Input
+            type='text'
+            value={dashboardDescription}
+            onChange={(event) => setDashboardDescription(event.target.value)}
+          />
         </FormControl>
         </ModalBody>
         <ModalFooter>

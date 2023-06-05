@@ -78,6 +78,8 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   const [route, setRoute] = useState<string>(dashboard.route);
   const [routeIsInvalid, setRouteIsInvalid] = useState<boolean>(false);
   const [routeError, setRouteError] = useState<string | undefined>(undefined);
+
+  const [description, setDescription] = useState<string>(dashboard.description || '');
   
   const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
   
@@ -90,6 +92,7 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
     const updatedDashboard: Dashboard = {
       ...dashboard,
       route,
+      description,
       parameters
     }
     updateDashboard(updatedDashboard);
@@ -184,6 +187,11 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
               onChange={updateRoute}
               invalid={routeIsInvalid}
               error={routeError}
+            />
+            <ValidatedInput
+              label={t('dashboardDescription')}
+              value={description}
+              onChange={setDescription}
             />
             </Box>
             <Box
