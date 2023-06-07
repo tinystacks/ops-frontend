@@ -8,7 +8,9 @@ const dependencies = processArgs.slice(2);
 const importStatements = dependencies?.map((dependency) => {
   const packageName = `@${dependency.split('@')?.at(1)}`;
   const moduleNamespace = camelCase(packageName);
-  return `export * as ${moduleNamespace} from '${packageName}';`;
+  const moduleImport = `export * as ${moduleNamespace} from '${packageName}';`;
+  const moduleSchemaImport = `export * as ${moduleNamespace}Schema from '${packageName}/dist/ops-types.json';`;
+  return `${moduleImport}\n${moduleSchemaImport}`;
 });
 
 if (importStatements.length === 0) {

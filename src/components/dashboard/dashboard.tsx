@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import isEqual from 'lodash.isequal';
 import camelCase from 'lodash.camelcase';
+import get from 'lodash.get';
+import sortBy from 'lodash.sortby';
 import apis from 'ops-frontend/utils/apis';
 import WrappedWidget from 'ops-frontend/components/widget/wrapped-widget';
 import { useRouter } from 'next/router'
@@ -17,11 +19,12 @@ import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
-import { FlatMap, Json, WidgetMap } from 'ops-frontend/types';
+import { FlatMap, FlatSchema, Json, WidgetMap } from 'ops-frontend/types';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 // eslint-disable-next-line import/no-unresolved
 import { useParams } from 'react-router-dom';
+import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
@@ -239,6 +242,19 @@ async function renderWidgetAndChildren(
   return await renderWidget(widget, renderedChildren, dependencies, dashboardId, parameters);
 }
 
+function getSchemaProperties (schema: JSONSchema7, requiredProperties: string[]): FlatSchema[] {
+  return Object.entries(schema.properties || {}).map(
+    ([propertyName, propertySchema]: [string, JSONSchema7Definition]) => {
+      const propertyDef: JSONSchema7 = typeof propertySchema === 'boolean' ? {} : propertySchema;
+      return {
+        ...propertyDef,
+        name: propertyName,
+        isRequired: requiredProperties.includes(propertyName)
+      }
+    }
+  );
+}
+
 async function renderWidget(
   widget: Widget,
   children: (Widget & { renderedElement: JSX.Element })[],
@@ -246,7 +262,8 @@ async function renderWidget(
   dashboardId?: string,
   parameters?: Json
 ): Promise<JSX.Element> {
-  let hydratedWidget; 
+  let hydratedWidget;
+  let widgetProperties: FlatSchema[] | undefined;
   if (widget.type === 'ErrorWidget') {
     hydratedWidget = ErrorWidget.fromJson(
       {
@@ -266,6 +283,37 @@ async function renderWidget(
     const moduleName = dependencies[widget.type];
     const moduleNamespace = camelCase(moduleName);
     const plugin = (plugins as any)[moduleNamespace] as any;
+    const schemaJson = (plugins as any)[`${moduleNamespace}Schema`];
+    const widgetSchema = get(schemaJson, `definitions.${widget.type}`) as JSONSchema7;
+    if (widgetSchema) {
+      const {
+        allOf = [],
+        anyOf = [],
+        oneOf = [],
+        required = []
+      } = widgetSchema;
+      const widgetSchemaProperties = getSchemaProperties(widgetSchema, required);
+      // FIXME: This is wrong.  Instead of spreading oneOf,
+      // we should present the subSchemas under it as variants that the user can choose from.
+      // Consider this when implementing typed inputs in Phase 2 or 3
+      const subSchemas = [...allOf, ...anyOf, ...oneOf];
+      if (subSchemas.length > 0) {
+        subSchemas.forEach((subSchema: JSONSchema7Definition) => {
+          const jsonSchema: JSONSchema7 = typeof subSchema === 'boolean' ? {} : subSchema;
+          const subSchemaProperties = getSchemaProperties(jsonSchema, jsonSchema.required || []);
+          widgetSchemaProperties.push(...subSchemaProperties);
+        });
+      }
+      const noEditProperties = ['id', 'type', 'additionalProperties'];
+      const editableProperties = widgetSchemaProperties
+        .filter(p => !noEditProperties.includes(p.name));
+      const requiredProperties = editableProperties.filter(p => p.isRequired);
+      const optionalProperties = editableProperties.filter(p => !p.isRequired);
+      widgetProperties = [
+        ...sortBy(requiredProperties, 'name'),
+        ...sortBy(optionalProperties, 'name')
+      ];
+    }
     hydratedWidget = plugin[widget.type].fromJson(widget);
   }
 
@@ -275,6 +323,7 @@ async function renderWidget(
     hydratedWidget={hydratedWidget}
     widget={widget}
     childrenWidgets={children}
+    widgetProperties={widgetProperties}
     dashboardId={dashboardId}
     parameters={parameters}
   />;
