@@ -10,3 +10,7 @@ export type GetWidgetArguments = {
   dashboardId?: string;
   parameters?: Json;
 };
+export type ShowableError = {
+  title: string;
+  message: string;
+}

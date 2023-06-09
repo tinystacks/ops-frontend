@@ -1,11 +1,73 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Console, Dashboard, Widget } from '@tinystacks/ops-model';
-import { RootState } from 'ops-frontend/store/store';
-import { WidgetMap } from 'ops-frontend/types';
+import { ApiError, Console, Dashboard, TinyStacksError, Widget } from '@tinystacks/ops-model';
+import { AppDispatch, RootState } from 'ops-frontend/store/store';
+import { ShowableError, WidgetMap } from 'ops-frontend/types';
+import apis from 'ops-frontend/utils/apis';
+
+export const createNewDashboard = (consoleName: string, dashboard: Dashboard) => async (dispatch: AppDispatch) => {
+  await dispatch(createTempDashboard(dashboard));
+
+  try {
+    await apis.createDashboard(consoleName, dashboard);
+    return dispatch(fetchConsoles(consoleName));
+  } catch (e) {
+    const error = (e as any).body as ApiError;
+    await dispatch(removeTempDashboard(dashboard));
+    return dispatch(handleError({
+      title: 'Failed to create dashboard!',
+      message: error?.body?.message || error?.message
+    }));
+  }
+}
+
+export const fetchConsoles = (consoleName?: string) => async (dispatch: AppDispatch) => {
+  try {
+    const response = await apis.getConsoles();
+    const consoles = (response || []) as Console[];
+    const console = consoleName ?
+      consoles.find(c => c.name === consoleName) :
+      consoles.at(0);
+    return dispatch(updateConsole(console || {} as Console));
+  } catch (e) {
+    const error = e as TinyStacksError;
+    return handleError({
+      title: 'Failed to create dashboard!',
+      message: error.message || ''
+    });
+  }
+}
+
+export const updateDashboard = (consoleName: string, dashboard: Dashboard, dashboardId?: string) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      await apis.updateDashboard(consoleName, dashboard, dashboardId);
+      return dispatch(fetchDashboards(consoleName));
+    } catch (e) {
+      const error = (e as any).body as ApiError;
+      return dispatch(handleError({
+        title: 'Failed to update dashboard!',
+        message: error?.body?.message || error?.message
+      }));
+    }
+  }
+
+export const fetchDashboards = (consoleName: string) => async (dispatch: AppDispatch) => {
+  try {
+    const dashboards = await apis.getDashboards(consoleName);
+    return dispatch(updateDashboards(dashboards || [] as Dashboard[]));
+  } catch (e) {
+    const error = (e as any).body as ApiError;
+    return dispatch(handleError({
+      title: 'Failed to fetch dashboards!',
+      message: error?.body?.message || error?.message
+    }));
+  }
+}
 
 type ConsoleSliceState = Console & {
   overrides: { [widgetId: string]: any; };
   hydratedWidgets: { [widgetId: string]: Widget };
+  error?: ShowableError;
 };
 
 export const consoleInitialState: ConsoleSliceState = {
@@ -81,12 +143,45 @@ export const consoleSlice = createSlice({
         ...state,
         overrides: widgetOverrides
       }
+    },
+    handleError: function (state: ConsoleSliceState, action: PayloadAction<ShowableError>) {
+      state.error = action.payload;
+    },
+    dismissError: function (state: ConsoleSliceState) {
+      state.error = undefined;
+    },
+    createTempDashboard: function (state: ConsoleSliceState, action: PayloadAction<Dashboard>) {
+      const dashboard = action.payload;
+      state.dashboards[dashboard.id] = dashboard;
+      return state;
+    },
+    removeTempDashboard: function (state: ConsoleSliceState, action: PayloadAction<Dashboard>) {
+      const dashboard = action.payload;
+      delete state.dashboards[dashboard.id];
+      return state;
+    },
+    updateDashboards: function (state: ConsoleSliceState, action: PayloadAction<Dashboard[]>) {
+      state.dashboards = action.payload.reduce<Record<string, Dashboard>>((acc, dashboard) => {
+        acc[dashboard.id] = dashboard;
+        return acc;
+      }, {});
+      return state;
     }
   }
 });
 
 export const {
-  updateConsoleName, updateHydratedWidget, deleteWidget, updateConsole, udpateWidgetOverrides, updateWidget
+  updateConsoleName,
+  updateHydratedWidget,
+  deleteWidget,
+  updateConsole,
+  udpateWidgetOverrides,
+  updateWidget,
+  handleError,
+  dismissError,
+  createTempDashboard,
+  removeTempDashboard,
+  updateDashboards
 } = consoleSlice.actions;
 
 export function selectName(state: RootState) { return state.console.name };
@@ -147,5 +242,8 @@ export function selectWidget(widgetId: string) {
   }
 }
 
+export function selectErropr(state: RootState): ShowableError | undefined {
+  return state.console.error;
+}
 
 export default consoleSlice.reducer;
