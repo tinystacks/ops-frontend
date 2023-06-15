@@ -1,7 +1,7 @@
 import { Dashboard, TinyStacksError } from '@tinystacks/ops-model'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getOpsApiClient } from 'ops-frontend/utils/get-ops-api-client';
-import { handleResponse } from 'ops-frontend/utils/handle-response';
+import { getOpsApiClient } from '../../../../utils/get-ops-api-client.js';
+import { handleResponse } from '../../../../utils/handle-response.js';
 
 export default async function handler(
   req: NextApiRequest,

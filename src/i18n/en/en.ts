@@ -1,8 +1,8 @@
-import common from 'ops-frontend/i18n/en/common';
-import home from 'ops-frontend/i18n/en/home';
-import { LocaleMessageType } from 'ops-frontend/i18n/messages';
-import widget from 'ops-frontend/i18n/en/widget';
-import dashboard from 'ops-frontend/i18n/en/dashboard';
+import common from '../../i18n/en/common.js';
+import home from '../../i18n/en/home.js';
+import { LocaleMessageType } from '../../i18n/messages.js';
+import widget from '../../i18n/en/widget.js';
+import dashboard from '../../i18n/en/dashboard.js';
 
 const en: LocaleMessageType = {
   common,

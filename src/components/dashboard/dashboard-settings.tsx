@@ -13,7 +13,7 @@ import { Dashboard, Parameter } from '@tinystacks/ops-model';
 import isEmpty from 'lodash.isempty';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import ParameterInput from 'ops-frontend/components/dashboard/parameter-input';
+import ParameterInput from '../../components/dashboard/parameter-input.js';
 
 type ValidatedInputProps = {
   label: string;

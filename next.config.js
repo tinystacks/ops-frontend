@@ -11,6 +11,10 @@ const nextConfig = {
         tls: false
       };
     }
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      '.js': ['.js', '.ts', '.jsx', '.tsx']
+    }
 
     return config;
   },
@@ -28,4 +32,4 @@ const nextConfig = {
   }
 }
 
-module.exports = nextConfig
+export default nextConfig;

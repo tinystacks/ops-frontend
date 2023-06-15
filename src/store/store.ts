@@ -1,6 +1,6 @@
 import type { PreloadedState } from '@reduxjs/toolkit';
 import { configureStore } from '@reduxjs/toolkit';
-import consoleReducer from 'ops-frontend/store/consoleSlice';
+import consoleReducer from '../store/consoleSlice.js';
 
 const rootReducer = {
   console: consoleReducer

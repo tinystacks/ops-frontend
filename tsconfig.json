@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ESNext",
     "lib": [
       "dom",
       "dom.iterable",
@@ -13,19 +13,25 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
+    "customConditions": [
+      "browser"
+    ],
     "isolatedModules": true,
     "incremental": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "outDir": "./dist",
     "paths": {
-      "ops-frontend/*": [
-        "./src/*"
-      ],
-      "ops-frontend-test/*": [
-        "./__tests__/*"
-      ]
+      // "next/*": [
+      //   "./node_modules/next/*"
+      // ]
+      // "ops-frontend/*": [
+      //   "./src/*"
+      // ],
+      // "ops-frontend-test/*": [
+      //   "./__tests__/*"
+      // ]
     },
     "jsx": "preserve"
   },
@@ -33,7 +39,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.css"
+    "**/*.css",
+    "./src"
   ],
   "exclude": [
     "node_modules",

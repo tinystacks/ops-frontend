@@ -1,5 +1,5 @@
 import { OpenAPIConfig, OpsApiClient } from '@tinystacks/ops-model';
-import { fetchApiKey } from 'ops-frontend/utils/fetch-api-key';
+import { fetchApiKey } from '../utils/fetch-api-key.js';
 
 
 function trimTrailingSlash (url: string): string {

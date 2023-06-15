@@ -1,17 +1,17 @@
-import { dismissError, handleError, selectConsoleName, selectDashboards, selectError, updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
+import { dismissError, handleError, selectConsoleName, selectDashboards, selectError, updateConsole, updateDashboard } from '../../store/consoleSlice.js';
 import React, { ReactNode, useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
-import apis from 'ops-frontend/utils/apis';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
+import apis from '../../utils/apis.js';
 import { Button, Flex, Heading, Stack, useDisclosure } from '@chakra-ui/react';
-import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
+import { HeaderLayout } from '../../components/layout/header-layout.js';
 import isEmpty from 'lodash.isempty';
-import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
+import { FullpageLayout } from '../../components/layout/fullpage-layout.js';
 import { SettingsIcon } from '@chakra-ui/icons';
 import { useTranslation } from 'react-i18next';
-import DashboardSettings from 'ops-frontend/components/dashboard/dashboard-settings';
+import DashboardSettings from '../../components/dashboard/dashboard-settings.js';
 import { ApiError, Dashboard } from '@tinystacks/ops-model';
 import { useNavigate } from 'react-router-dom';
-import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
+import DismissableErrorBanner from '../../components/common/dismissable-error-banner.js';
 
 export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboardId: string }) {
   const { dashboardContents, dashboardId } = props;

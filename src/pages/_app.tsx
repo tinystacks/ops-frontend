@@ -1,10 +1,10 @@
-import 'ops-frontend/i18n/i18n';
-import 'ops-frontend/styles/globals.css'
-import type { AppProps } from 'next/app'
+import '../i18n/i18n.js';
+import '../styles/globals.css'
+import type { AppProps } from 'next/app.js'
 import { Provider } from 'react-redux';
-import { store } from 'ops-frontend/store/store';
+import { store } from '../store/store.js';
 import { ChakraProvider, CSSReset } from '@chakra-ui/react';
-import { AppLayout } from 'ops-frontend/components/layout/app-layout';
+import { AppLayout } from '../components/layout/app-layout.js';
 import { extendTheme } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 

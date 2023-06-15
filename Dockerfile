@@ -15,7 +15,7 @@ COPY . .
 
 RUN npm ci
 RUN if [ ! -z "${DEPENDENCIES}" ]; then npm i $DEPENDENCIES; fi;
-RUN node ./generate-plugins-index.js $DEPENDENCIES;
+RUN node ./generate-plugins-index.cjs $DEPENDENCIES;
 RUN npm run build
 # RUN rm -rf ./src
 RUN npm prune --production

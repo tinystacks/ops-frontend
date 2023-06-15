@@ -11,7 +11,7 @@ import {
   Text
 } from '@chakra-ui/react';
 import upperFirst from 'lodash.upperfirst';
-import { ShowableError } from 'ops-frontend/types';
+import { ShowableError } from '../../types.js';
 
 type DismissableErrorBannerProps = {
   error: ShowableError,

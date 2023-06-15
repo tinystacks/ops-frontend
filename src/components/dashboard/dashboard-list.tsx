@@ -10,7 +10,7 @@ import {
   useDisclosure,
   Wrap
 } from '@chakra-ui/react';
-import apis from 'ops-frontend/utils/apis';
+import apis from '../../utils/apis.js';
 import {
   createNewDashboard,
   dismissError,
@@ -18,14 +18,14 @@ import {
   selectDashboards,
   selectError,
   updateConsole
-} from 'ops-frontend/store/consoleSlice';
-import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
-import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
-import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { DashboardCard } from 'ops-frontend/components/dashboard/dashboard-card';
-import CreateDashboardModal from 'ops-frontend/components/dashboard/create-dashboard-modal';
-import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
-import { ShowableError } from 'ops-frontend/types';
+} from '../../store/consoleSlice.js';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
+import { HeaderLayout } from '../../components/layout/header-layout.js';
+import { FullpageLayout } from '../../components/layout/fullpage-layout.js';
+import { DashboardCard } from '../../components/dashboard/dashboard-card.js';
+import CreateDashboardModal from '../../components/dashboard/create-dashboard-modal.js';
+import DismissableErrorBanner from '../../components/common/dismissable-error-banner.js';
+import { ShowableError } from '../../types.js';
 
 export function DashboardList () {
   const { t: hm } = useTranslation('home');

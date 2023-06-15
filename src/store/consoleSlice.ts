@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TinyStacksError } from '@tinystacks/ops-core';
 import { ApiError, Console, Dashboard, Widget } from '@tinystacks/ops-model';
-import { AppDispatch, RootState } from 'ops-frontend/store/store';
-import { ShowableError, WidgetMap } from 'ops-frontend/types';
-import apis from 'ops-frontend/utils/apis';
+import { AppDispatch, RootState } from '../store/store.js';
+import { ShowableError, WidgetMap } from '../types.js';
+import apis from '../utils/apis.js';
 
 export const createNewDashboard = (consoleName: string, dashboard: Dashboard) => async (dispatch: AppDispatch) => {
   await dispatch(createTempDashboard(dashboard));

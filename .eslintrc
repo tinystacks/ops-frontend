@@ -47,19 +47,6 @@
     ],
     "import/no-unresolved": "error",
     "no-console": "error",
-    "no-restricted-imports": [
-      "error",
-      {
-        "patterns": [
-          {
-            "group": [
-              "../*",
-              "./*"
-            ],
-            "message": "Usage of relative paths is not allowed"
-          }
-        ]
-      }
-    ]
+    "@next/next/no-head-element": "off"
   }
 }
