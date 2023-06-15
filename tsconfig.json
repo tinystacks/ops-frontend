@@ -22,25 +22,12 @@
     "incremental": true,
     "baseUrl": "./",
     "outDir": "./dist",
-    "paths": {
-      // "next/*": [
-      //   "./node_modules/next/*"
-      // ]
-      // "ops-frontend/*": [
-      //   "./src/*"
-      // ],
-      // "ops-frontend-test/*": [
-      //   "./__tests__/*"
-      // ]
-    },
     "jsx": "preserve"
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.css",
-    "./src"
+    "types.d.ts",
+    "src"
   ],
   "exclude": [
     "node_modules",

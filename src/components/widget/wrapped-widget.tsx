@@ -94,6 +94,11 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <Box data-testid='widget' className='widget' key={widget.id}>
       {heading}
       <Flex className='widgetBody'>
+        {/*
+          tsc isn't respecting the "browser" condition like it should,
+          but next and webpack resolve the module correctly
+        */}
+        {/* @ts-ignore */}
         {hydratedWidget.render(
           childrenWidgets,
           updateOverrides
