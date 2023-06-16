@@ -1,21 +1,21 @@
 import React from 'react';
-import { useAppDispatch } from 'ops-frontend/store/hooks';
+import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import { useTranslation } from 'react-i18next';
 import {
   Button, MenuItem, Modal, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Textarea,
   useDisclosure
 } from '@chakra-ui/react';
 import apis from 'ops-frontend/utils/apis';
-import { selectWidget, updateHydratedWidget, updateWidget } from 'ops-frontend/store/consoleSlice';
+import { selectConsoleWidgets, selectProviders, selectWidget, updateHydratedWidget, updateWidget } from 'ops-frontend/store/consoleSlice';
 import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
 import { useSelector } from 'react-redux';
 import { FlatSchema, Json } from 'ops-frontend/types';
-import WidgetProperty from 'ops-frontend/components/widget/widget-propety';
+import { WidgetDropdownProperty, WidgetListProperty, WidgetProperty } from 'ops-frontend/components/widget/widget-propety';
 import { doNothing } from 'ops-frontend/utils/do-nothing';
 import isPlainObject from 'lodash.isplainobject';
 
 export default function EditWidgetModal(props: {
-  console: string;
+  Console: string;
   widgetId: string;
   widgetProperties?: FlatSchema[];
   dashboardId?: string;
@@ -27,7 +27,7 @@ export default function EditWidgetModal(props: {
 
   // props
   const {
-    console,
+    Console,
     widgetId,
     widgetProperties,
     dashboardId,
@@ -37,12 +37,15 @@ export default function EditWidgetModal(props: {
   // redux
   const dispatch = useAppDispatch();
   const widget = useSelector(selectWidget(widgetId));
+  const providers = useAppSelector(selectProviders);
+  const widgets = useAppSelector(selectConsoleWidgets);
 
   //state
   const [value, setValue] = React.useState(JSON.stringify(widget, undefined, 2));
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
 
   function handleInputChange(e: { target: { value: string; }; }) {
     let inputValue = e.target.value
@@ -53,10 +56,11 @@ export default function EditWidgetModal(props: {
     setLoading(true);
     setError(undefined);
     try {
-      const updatedWidget = await apis.updateWidget(console, widget.id, JSON.parse(value));
+      //console.log('updated: ',JSON.parse(value) );
+      const updatedWidget = await apis.updateWidget(Console, widget.id, JSON.parse(value));
       dispatch(updateWidget(updatedWidget));
       const hydratedUpdatedWidget = await apis.getWidget({
-        consoleName: console,
+        consoleName: Console,
         widget,
         dashboardId,
         parameters
@@ -73,7 +77,7 @@ export default function EditWidgetModal(props: {
     onClose();
   }
 
-  function updateWidgetProperty (key: string, newValue: string) {
+  function updateWidgetProperty (key: string, newValue: any) {
     const widgetJson = JSON.parse(value);
     widgetJson[key] = newValue;
     setValue(JSON.stringify(widgetJson));
@@ -118,15 +122,54 @@ export default function EditWidgetModal(props: {
       const inputValue = isPlainObject(propertyValue) || Array.isArray(propertyValue) ?
         JSON.stringify(propertyValue) :
         propertyValue;
-      return (
-        <WidgetProperty
+      let widgetPropertyItem; 
+      if(name === 'childrenIds'){ 
+        widgetPropertyItem = (
+          <WidgetDropdownProperty
+          key={`widget-input-${name}`}
+          options={Object.keys(widgets)}
+          name={name}
+          value={propertyValue}
+          setter={updateWidgetProperty}
+          isRequired={isRequired}
+        />
+        ); 
+
+
+      } else if(name === 'providerIds'){
+        widgetPropertyItem = (
+          <WidgetDropdownProperty
+          key={`widget-input-${name}`}
+          options={Object.keys(providers)}
+          name={name}
+          value={propertyValue}
+          setter={updateWidgetProperty}
+          isRequired={isRequired}
+        />
+        ); 
+
+      } else if(Array.isArray(propertyValue)){ 
+        widgetPropertyItem = (
+          <WidgetListProperty
+          key={`widget-input-${name}`}
+          name={name}
+          value={propertyValue}
+          setter={updateWidgetProperty}
+          isRequired={isRequired}
+        />
+        ) 
+      } else { 
+        widgetPropertyItem = (
+          <WidgetProperty
           key={`widget-input-${name}`}
           name={name}
           value={inputValue}
           setter={updateWidgetProperty}
           isRequired={isRequired}
         />
-      );
+        );
+      }
+      return widgetPropertyItem;
     }));
   }
 

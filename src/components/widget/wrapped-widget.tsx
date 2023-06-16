@@ -64,7 +64,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <></> :
     <Box className='widgetHeader'>
       <Flex>
-        <Center>
+           <Center>
           <Heading as='h4' size='md'>
             {widget.displayName || widget.id}
           </Heading>
@@ -81,13 +81,13 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
             <MenuList className='dropdown'>
               <EditWidgetModal
                 key={`${widget.id}-edit`}
-                console={consoleName}
+                Console={consoleName}
                 widgetId={widget.id}
                 widgetProperties={widgetProperties}
                 dashboardId={dashboardId}
                 parameters={parameters}
               />
-              <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget} />
+              <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget}/>
             </MenuList>
           </Menu>
         </Box>

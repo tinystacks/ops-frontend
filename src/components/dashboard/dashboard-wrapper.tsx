@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import DashboardSettings from 'ops-frontend/components/dashboard/dashboard-settings';
 import { Dashboard } from '@tinystacks/ops-model';
 import { useNavigate } from 'react-router-dom';
+import CreateWidgetModal from 'ops-frontend/components/dashboard/create-widget-modal';
 
 export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboardId: string }) {
   const { dashboardContents, dashboardId } = props;
@@ -26,6 +27,11 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
     isOpen: settingsIsOpen,
     onOpen: settingsOnOpen,
     onClose: settingsOnClose
+  } = useDisclosure();
+
+  const {
+    isOpen: createIsOpen,
+    onOpen: createOnOpen
   } = useDisclosure();
   
   async function fetchData() {
@@ -59,6 +65,14 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
     }
   });
 
+  const createWidgetModal = createIsOpen ? (
+    <CreateWidgetModal
+      isOpen={createIsOpen}
+      consoleName={consoleName}
+      dashboardId={dashboardId}
+    />
+  ) : (<></>);
+
   function renderHeader() {
     return (
       <>
@@ -72,6 +86,15 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
           onClick={settingsOnOpen}
         >
           {t('dashboardSettings')}
+        </Button>
+        <Button
+          aria-label={'create-widget'}
+          leftIcon={<SettingsIcon />}
+          variant='outline'
+          colorScheme='gray'
+          onClick={createOnOpen}
+        >
+          {'Create Widget'}
         </Button>
       </Flex>
       </>
@@ -92,6 +115,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
 
   return (
     <>
+      {createWidgetModal}
       <HeaderLayout>
         {renderHeader()}
       </HeaderLayout>

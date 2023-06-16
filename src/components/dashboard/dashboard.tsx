@@ -25,7 +25,6 @@ import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 // eslint-disable-next-line import/no-unresolved
 import { useParams } from 'react-router-dom';
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
-
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
 // 2. A rendered-out list of widgets
@@ -126,7 +125,7 @@ function Dashboard() {
   function renderDashboardWidgets() {
     return (
       <div>
-        {Object.values(renderedWidgets)}
+          {Object.values(renderedWidgets)}
       </div>
     );
   }

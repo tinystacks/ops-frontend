@@ -101,6 +101,14 @@ export const consoleSlice = createSlice({
         hydratedWidgets
       };
     },
+    createWidget: function(state: ConsoleSliceState, action: PayloadAction<Widget>){ 
+      const widgets = {...state.widgets}; 
+      widgets[action.payload.id] = action.payload;
+      return { 
+        ...state, 
+        widgets
+      }
+    },
     updateWidget: function (state: ConsoleSliceState, action: PayloadAction<Widget>) {
       const widgets  = { ...state.widgets };
       widgets[action.payload.id || ''] = action.payload;
@@ -176,6 +184,7 @@ export const {
   deleteWidget,
   updateConsole,
   udpateWidgetOverrides,
+  createWidget,
   updateWidget,
   handleError,
   dismissError,
@@ -210,6 +219,7 @@ export function selectDashboardWidgets(dashboardId: string) {
     return dashboard.widgetIds.map(wid => hydratedWidgets[wid]);
   }
 }
+
 export function selectConsoleState(state: RootState): Console {
   return state.console;
 }
@@ -224,6 +234,10 @@ export function selectHydratedWidgets(state: RootState): WidgetMap {
 
 export function selectDependencies(state: RootState): {[id: string]: string} {
   return state.console.dependencies;
+}
+
+export function selectProviders(state: RootState): {[id: string]: string} {
+  return state.console.providers;
 }
 
 export function selectConsoleName(state: RootState): string {
