@@ -1,10 +1,10 @@
 import React from 'react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, Text } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
-import { selectDashboard, selectDashboardIdFromRoute } from 'ops-frontend/store/consoleSlice';
-import { useAppSelector } from 'ops-frontend/store/hooks';
+import { useRouter } from 'next/router.js';
+import { selectDashboard, selectDashboardIdFromRoute } from '../../store/consoleSlice.js';
+import { useAppSelector } from '../../store/hooks.js';
 import { useTranslation } from 'react-i18next';
-import { dashboardQueryToDashboardRoute } from 'ops-frontend/utils/route';
+import { dashboardQueryToDashboardRoute } from '../../utils/route.js';
 import { ChevronRightIcon } from '@chakra-ui/icons';
 
 export default function Breadcrumbs() {

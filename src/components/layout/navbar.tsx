@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Logo } from 'ops-frontend/components/layout/logo';
+import { Logo } from '../../components/layout/logo.js';
 
 
 export default function Navbar() {

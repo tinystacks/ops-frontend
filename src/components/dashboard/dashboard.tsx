@@ -2,24 +2,25 @@ import React, { useState } from 'react';
 import isEmpty from 'lodash.isempty';
 import isEqual from 'lodash.isequal';
 import camelCase from 'lodash.camelcase';
-import apis from 'ops-frontend/utils/apis';
-import WrappedWidget from 'ops-frontend/components/widget/wrapped-widget';
-import { useRouter } from 'next/router'
-import { DashboardWrapper } from 'ops-frontend/components/dashboard/dashboard-wrapper';
+import { useRouter } from 'next/router.js'
+import apis from '../../utils/apis.js';
+import WrappedWidget from '../../components/widget/wrapped-widget.js';
+import { DashboardWrapper } from '../../components/dashboard/dashboard-wrapper.js';
 import {
   selectConsoleName, selectConsoleWidgets, selectDependencies, selectHydratedWidgets, selectDashboard,
-  selectDashboardIdFromRoute, selectDashboardWidgets, updateHydratedWidget
-} from 'ops-frontend/store/consoleSlice';
-import { useAppSelector } from 'ops-frontend/store/hooks';
+  selectDashboardIdFromRoute, selectDashboardWidgets, updateHydratedWidget, handleError
+} from '../../store/consoleSlice.js';
+import { useAppSelector } from '../../store/hooks.js';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef } from 'react';
-import { useAppDispatch } from 'ops-frontend/store/hooks';
-import { AppDispatch } from 'ops-frontend/store/store';
-import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
-import { FlatMap, Json, WidgetMap } from 'ops-frontend/types';
-import ErrorWidget from 'ops-frontend/widgets/error-widget';
-import LoadingWidget from 'ops-frontend/widgets/loading-widget';
+import { useAppDispatch } from '../../store/hooks.js';
+import { AppDispatch } from '../../store/store.js';
+import { FullpageLayout } from '../../components/layout/fullpage-layout.js';
+import { Parameter, Widget, TinyStacksError as TinyStacksErrorType } from '@tinystacks/ops-model';
+import { TinyStacksError } from '@tinystacks/ops-core';
+import { FlatMap, Json, WidgetMap } from '../../types.js';
+import ErrorWidget from '../../widgets/error-widget.js';
+import LoadingWidget from '../../widgets/loading-widget.js';
 // eslint-disable-next-line import/no-unresolved
 import { useParams } from 'react-router-dom';
 
@@ -73,18 +74,25 @@ function Dashboard() {
 
   useEffect(() => {
     async function importAndRenderWidgets() {
-      const deepRenderedWidgets = { ...renderedWidgets };
-      for (let widget of dashboardWidgets) {
-        deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(
-          widget,
-          hydratedWidgets,
-          dependencies,
-          dashboardId,
-          parameters
-        );
+      try {
+        const deepRenderedWidgets = { ...renderedWidgets };
+        for (let widget of dashboardWidgets) {
+          deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(
+            widget,
+            hydratedWidgets,
+            dependencies,
+            dashboardId,
+            parameters
+          );
+        }
+  
+        setRenderedWidgets(deepRenderedWidgets);
+      } catch (error: any) {
+        dispatch(handleError({
+          title: 'Could not render widgets!',
+          error: error?.body || error
+        }));
       }
-
-      setRenderedWidgets(deepRenderedWidgets);
     }
 
     // TODO: deep compare widget trees that are rendered on this dashboard instead
@@ -252,7 +260,7 @@ async function renderWidget(
       {
         ...widget,
         originalType: widget.type,
-        error: (widget as TinyStacksError).message || ''
+        error: (widget as unknown as TinyStacksErrorType).message || ''
       }
     )
   } else if (widget.type === 'LoadingWidget') {
@@ -262,10 +270,17 @@ async function renderWidget(
       originalType: widget.originalType
     });
   } else { 
-    const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
+    const plugins = await import('../../plugins.js'); // eslint-disable-line import/no-unresolved
     const moduleName = dependencies[widget.type];
     const moduleNamespace = camelCase(moduleName);
     const plugin = (plugins as any)[moduleNamespace] as any;
+    if (!plugin) {
+      throw TinyStacksError.fromJson({
+        message: 'Missing dependency!',
+        status: 424,
+        cause: `Cannot find module ${moduleName} for widget type ${widget.type} used in ${widget.id}.`
+      }).toJson();
+    }
     hydratedWidget = plugin[widget.type].fromJson(widget);
   }
 

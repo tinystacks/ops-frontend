@@ -1,7 +1,6 @@
-import { Box, Flex } from '@chakra-ui/react';
-import Navbar from 'ops-frontend/components/layout/navbar';
-import Head from 'next/head';
 import React from 'react';
+import { Box, Flex } from '@chakra-ui/react';
+import Navbar from '../../components/layout/navbar.js';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -16,11 +15,11 @@ const inter = Inter({ subsets: ['latin'] })
 export function AppLayout (props: LayoutProps) {
   return (
     <Box h="100vh" className={inter.className}>
-      <Head>
+      <head>
         <title>OpsConsole</title>
         <meta name="description" content="The developer portal for cloud operations" />
         <link rel="icon" href="/iconv2.svg" />
-      </Head>
+      </head>
       <Flex flexDirection="column" h="100vh" minWidth="sm" overflow="auto" className='app'>
         <Navbar />
         {props.children}

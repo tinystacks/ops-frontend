@@ -1,19 +1,20 @@
 import {
   Alert,
+  Box,
   Container,
   Center,
   Flex,
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  CloseButton
+  CloseButton,
+  Text
 } from '@chakra-ui/react';
+import upperFirst from 'lodash.upperfirst';
+import { ShowableError } from '../../types.js';
 
 type DismissableErrorBannerProps = {
-  error: {
-    title: string;
-    message: string;
-  },
+  error: ShowableError,
   dismissError: () => void;
 };
 
@@ -21,16 +22,53 @@ export default function DismissableErrorBanner (props: DismissableErrorBannerPro
   const {
     error: {
       title,
-      message
+      message,
+      cause,
+      context,
+      fields = {}
     },
     dismissError
   } = props;
 
+  let extraDetail;
+  if (cause || context) {
+    const punctuationCheck = new RegExp('.*[,.?!;:=-]');
+    let causePunctuation; 
+    if (cause) {
+      causePunctuation =  punctuationCheck.test(cause) ? '' :
+        (
+          context ? ':' : '.'
+        );
+    }
+    extraDetail = (
+      <Box display='block' alignContent='start'>
+        <Text>
+          {`${upperFirst(cause)}${causePunctuation}`}
+        </Text>
+        <Text whiteSpace='pre' textAlign='left' fontFamily='monospace'>
+          {
+            context ? context :
+            Object.entries(fields).map(([property, propError]) => {
+              return `${property} - ${propError}`
+            }).join('\n')
+          }
+        </Text>
+      </Box>
+    )
+  }
+
   return (
-    <Alert status='error' alignContent='center' w='auto'>
+    <Alert
+      status='error'
+      w='auto'
+      flexDirection='column'
+      alignItems='center'
+      justifyContent='center'
+      textAlign='center'
+    >
       <Container maxW="7xl">
         <Center>
-          <Flex>
+          <Flex alignContent='space-between'>
             <AlertIcon
               alignSelf='center'
               position='relative'
@@ -49,6 +87,7 @@ export default function DismissableErrorBanner (props: DismissableErrorBannerPro
           </Flex>
         </Center>
       </Container>
+      {extraDetail}
     </Alert>
   );
 }

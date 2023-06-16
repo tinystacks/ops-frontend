@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from 'ops-frontend/img/logo.png';
+import logo from '../../img/logo.png';
 import { Image, HStack, Heading } from '@chakra-ui/react';
 
 export function Logo ({

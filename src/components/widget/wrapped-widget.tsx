@@ -2,22 +2,22 @@ import {
   Heading, Flex, Spacer, Box, IconButton, Menu, MenuButton, MenuList, Center
 } from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons'
-import { Widget } from '@tinystacks/ops-model';
-import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
-import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
-import { BaseWidget } from '@tinystacks/ops-core';
-import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
-import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
-import apis from 'ops-frontend/utils/apis';
-import { Json } from 'ops-frontend/types';
-import LoadingWidget from 'ops-frontend/widgets/loading-widget';
-import ErrorWidget from 'ops-frontend/widgets/error-widget';
+import { Widget as WidgetType } from '@tinystacks/ops-model';
+import EditWidgetModal from '../../components/widget/edit-widget-modal.js';
+import DeleteWidgetModal from '../../components/widget/delete-widget-modal.js';
+import { Widget } from '@tinystacks/ops-core';
+import { selectConsoleName, updateHydratedWidget } from '../../store/consoleSlice.js';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
+import apis from '../../utils/apis.js';
+import { Json } from '../../types.js';
+import LoadingWidget from '../../widgets/loading-widget.js';
+import ErrorWidget from '../../widgets/error-widget.js';
 
 
 export type WrappedWidgetProps = {
-  hydratedWidget: BaseWidget,
-  widget: Widget,
-  childrenWidgets: (Widget & { renderedElement: JSX.Element })[],
+  hydratedWidget: Widget,
+  widget: WidgetType,
+  childrenWidgets: (WidgetType & { renderedElement: JSX.Element })[],
   dashboardId?: string,
   parameters?: Json
 };
@@ -94,6 +94,11 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <Box data-testid='widget' className='widget' key={widget.id}>
       {heading}
       <Flex className='widgetBody'>
+        {/*
+          tsc isn't respecting the "browser" condition like it should,
+          but next and webpack resolve the module correctly
+        */}
+        {/* @ts-ignore */}
         {hydratedWidget.render(
           childrenWidgets,
           updateOverrides

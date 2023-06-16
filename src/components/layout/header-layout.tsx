@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Container, useColorModeValue } from '@chakra-ui/react';
-import Breadcrumbs from 'ops-frontend/components/layout/breadcrumbs';
+import Breadcrumbs from '../../components/layout/breadcrumbs.js';
 
 
 export function HeaderLayout(props: { children?: React.ReactNode }) {

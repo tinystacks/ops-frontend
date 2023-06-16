@@ -4,3 +4,5 @@ declare module '*module.css' {
   }
   export default styles
 }
+
+declare module '*.png';

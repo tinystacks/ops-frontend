@@ -10,30 +10,31 @@ import {
   useDisclosure,
   Wrap
 } from '@chakra-ui/react';
-import apis from 'ops-frontend/utils/apis';
+import apis from '../../utils/apis.js';
 import {
   createNewDashboard,
   dismissError,
   selectConsoleName,
   selectDashboards,
-  selectErropr,
+  selectError,
   updateConsole
-} from 'ops-frontend/store/consoleSlice';
-import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
-import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
-import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { DashboardCard } from 'ops-frontend/components/dashboard/dashboard-card';
-import CreateDashboardModal from 'ops-frontend/components/dashboard/create-dashboard-modal';
-import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
+} from '../../store/consoleSlice.js';
+import { useAppDispatch, useAppSelector } from '../../store/hooks.js';
+import { HeaderLayout } from '../../components/layout/header-layout.js';
+import { FullpageLayout } from '../../components/layout/fullpage-layout.js';
+import { DashboardCard } from '../../components/dashboard/dashboard-card.js';
+import CreateDashboardModal from '../../components/dashboard/create-dashboard-modal.js';
+import DismissableErrorBanner from '../../components/common/dismissable-error-banner.js';
+import { ShowableError } from '../../types.js';
 
 export function DashboardList () {
   const { t: hm } = useTranslation('home');
   const { t: d } = useTranslation('dashboard');
   const dashboards = useAppSelector(selectDashboards);
   const consoleName = useAppSelector(selectConsoleName);
-  const error = useAppSelector(selectErropr);
+  const error = useAppSelector(selectError);
   const dispatch = useAppDispatch();
-  const [consolesError, setConsolesError] = useState<string | undefined>(undefined);
+  const [consolesError, setConsolesError] = useState<ShowableError | undefined>(undefined);
   const [retryCount, setRetryCount] = useState<number>(0);
   async function fetchData() {
     try {
@@ -45,7 +46,17 @@ export function DashboardList () {
         setRetryCount(0);
       }
     } catch (e: any) {
-      setConsolesError(e.message);
+      const {
+        message,
+        cause,
+        context
+      } = e?.body?.body || {};
+      setConsolesError({
+        title: hm('consolesError'),
+        message,
+        cause,
+        context
+      });
       setRetryCount(retryCount + 1);
     }
   }
@@ -97,7 +108,7 @@ export function DashboardList () {
     errorBanner = (
       <DismissableErrorBanner
         key='consoles-error'
-        error={{ title: hm('consolesError'), message: consolesError }}
+        error={consolesError}
         dismissError={() => setConsolesError(undefined)}
       />
     );

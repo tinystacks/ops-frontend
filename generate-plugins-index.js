@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const camelCase = require('lodash.camelcase');
+import path from 'path';
+import fs from 'fs';
+import camelCase from 'lodash.camelcase';
 
 const processArgs = [...process.argv];
 const dependencies = processArgs.slice(2);

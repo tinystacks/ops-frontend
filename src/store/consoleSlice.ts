@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ApiError, Console, Dashboard, TinyStacksError, Widget } from '@tinystacks/ops-model';
-import { AppDispatch, RootState } from 'ops-frontend/store/store';
-import { ShowableError, WidgetMap } from 'ops-frontend/types';
-import apis from 'ops-frontend/utils/apis';
+import { TinyStacksError } from '@tinystacks/ops-core';
+import { ApiError, Console, Dashboard, Widget } from '@tinystacks/ops-model';
+import { AppDispatch, RootState } from '../store/store.js';
+import { ShowableError, WidgetMap } from '../types.js';
+import apis from '../utils/apis.js';
 
 export const createNewDashboard = (consoleName: string, dashboard: Dashboard) => async (dispatch: AppDispatch) => {
   await dispatch(createTempDashboard(dashboard));
@@ -15,7 +16,7 @@ export const createNewDashboard = (consoleName: string, dashboard: Dashboard) =>
     await dispatch(removeTempDashboard(dashboard));
     return dispatch(handleError({
       title: 'Failed to create dashboard!',
-      message: error?.body?.message || error?.message
+      error: error?.body || error
     }));
   }
 }
@@ -29,10 +30,10 @@ export const fetchConsoles = (consoleName?: string) => async (dispatch: AppDispa
       consoles.at(0);
     return dispatch(updateConsole(console || {} as Console));
   } catch (e) {
-    const error = e as TinyStacksError;
+    const error = (e as any).body as ApiError;
     return handleError({
-      title: 'Failed to create dashboard!',
-      message: error.message || ''
+      title: 'Failed to fetch consoles!',
+      error: error?.body || error
     });
   }
 }
@@ -46,7 +47,7 @@ export const updateDashboard = (consoleName: string, dashboard: Dashboard, dashb
       const error = (e as any).body as ApiError;
       return dispatch(handleError({
         title: 'Failed to update dashboard!',
-        message: error?.body?.message || error?.message
+        error: error?.body || error
       }));
     }
   }
@@ -59,7 +60,7 @@ export const fetchDashboards = (consoleName: string) => async (dispatch: AppDisp
     const error = (e as any).body as ApiError;
     return dispatch(handleError({
       title: 'Failed to fetch dashboards!',
-      message: error?.body?.message || error?.message
+      error: error?.body
     }));
   }
 }
@@ -144,8 +145,18 @@ export const consoleSlice = createSlice({
         overrides: widgetOverrides
       }
     },
-    handleError: function (state: ConsoleSliceState, action: PayloadAction<ShowableError>) {
-      state.error = action.payload;
+    handleError: function (state: ConsoleSliceState, action: PayloadAction<{ title: string; error: any }>) {
+      if (TinyStacksError.isTinyStacksError(action.payload.error)) {
+        state.error = {
+          title: action.payload.title,
+          ...action.payload.error
+        };
+      } else {
+        state.error = {
+          title: action.payload.title,
+          message: action.payload.error.message
+        };
+      }
     },
     dismissError: function (state: ConsoleSliceState) {
       state.error = undefined;
@@ -242,7 +253,7 @@ export function selectWidget(widgetId: string) {
   }
 }
 
-export function selectErropr(state: RootState): ShowableError | undefined {
+export function selectError(state: RootState): ShowableError | undefined {
   return state.console.error;
 }
 

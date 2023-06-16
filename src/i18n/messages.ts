@@ -1,4 +1,4 @@
-import en from 'ops-frontend/i18n/en/en';
+import en from '../i18n/en/en.js';
 
 export type LocaleMessageType = { [key: string]: (string | (() => any) | LocaleMessageType)};
 

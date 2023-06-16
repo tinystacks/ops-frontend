@@ -1,6 +1,6 @@
 import { Dashboard, OpsApiClient, TinyStacksError, Widget } from '@tinystacks/ops-model';
-import { GetWidgetArguments } from 'ops-frontend/types';
-import ErrorWidget from 'ops-frontend/widgets/error-widget';
+import { GetWidgetArguments } from '../types.js';
+import ErrorWidget from '../widgets/error-widget.js';
 
 // This file mostly exists to make testing easy
 const client = new OpsApiClient({ BASE: '/api' });
