@@ -277,7 +277,7 @@ async function renderWidget(
       {
         ...widget,
         originalType: widget.type,
-        error: (widget as TinyStacksErrorType).message || ''
+        error: (widget as unknown as TinyStacksErrorType).message || ''
       }
     )
   } else if (widget.type === 'LoadingWidget') {
@@ -286,7 +286,7 @@ async function renderWidget(
       // @ts-ignore
       originalType: widget.originalType
     });
-  } else { 
+  } else {
     const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
     const moduleName = dependencies[widget.type];
     const moduleNamespace = camelCase(moduleName);
@@ -328,9 +328,9 @@ async function renderWidget(
         ...sortBy(requiredProperties, 'name'),
         ...sortBy(optionalProperties, 'name')
       ];
+    }
     hydratedWidget = plugin[widget.type].fromJson(widget);
   }
-
   return <WrappedWidget
     key={widget.id}
     // @ts-ignore
