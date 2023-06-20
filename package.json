@@ -54,8 +54,6 @@
     "next-compose-plugins": "^2.2.1",
     "next-optimized-images": "^2.6.2",
     "react": "18.2.0",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
     "react-i18next": "^12.1.5",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.12.1",

@@ -243,7 +243,7 @@ export function WidgetNumberProperty(props: WidgetPropertyProps) {
       isDisabled={isDisabled}
       isRequired={isRequired}
     >
-      <NumberInput value={value} onChange={(event) => setter(name, event.target.value)}>
+      <NumberInput value={value} onChange={(event) => setter(name, event)} >
         <NumberInputField />
         <NumberInputStepper>
           <NumberIncrementStepper />
@@ -271,7 +271,7 @@ export function WidgetBooleanProperty(props: WidgetPropertyProps) {
         isRequired={isRequired}
       >
         <FormLabel>{name}</FormLabel>
-        <Select size='md' placeholder={value} onChange={(event) => setter(name, [event.target.value])}>
+        <Select size='md' placeholder={value} onChange={(event) => setter(name, event.target.value)}>
           <option value='true'> True </option>
           <option value='false'> False </option>
         </Select>

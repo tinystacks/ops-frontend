@@ -46,14 +46,13 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
 
   const dispatch = useAppDispatch();
 
-  const [widgetId, setWidgetId] = useState<string>(); //required
-  const [widgetDisplayName, setWidgetDisplayName] = useState<string>(); //required
-  const [widgetRegion, setWidgetRegion] = useState<string>(); 
+  const [widgetId, setWidgetId] = useState<string>('');
+  const [widgetDisplayName, setWidgetDisplayName] = useState<string>('');
+  const [widgetRegion, setWidgetRegion] = useState<string>(''); 
   const [widgetProviders, setWidgetProviders] =  useState<string[]>(); 
   const [widgetChildren, setWidgetChildren] =  useState<string[]>(); 
-  const [widgetType, setWidgetType] =  useState<string>(); //required
+  const [widgetType, setWidgetType] =  useState<string>('');
   const [widgetProperties, setWidgetProperties] = useState<{key: string, value: any}[]>([]);
-  //need a way to add tyep location to dep list
   const [widgetIdIsInvalid, setWidgetIdIsInvalid] = useState<boolean>(false);
   const [widgetIdError, setWidgetError] = useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>(undefined);
@@ -71,7 +70,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
       setWidgetIdIsInvalid(nameIsInvalid);
       const nameCharacterMessage = t('nameCharacterMessage');
       setWidgetError(nameCharacterMessage);
-    } else if (widgets[widgetId]) {
+    } else if (widgets.find(widget => widget.id = widgetId)) {
       setWidgetIdIsInvalid(true);
       const uniqueMessage = t('uniqueMessage');
       setWidgetError(uniqueMessage);
@@ -205,7 +204,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
           <Input
             type='text'
             value={widgetProviders}
-            onChange={(event) => setWidgetProviders(event.target.value)}
+            onChange={(event) => setWidgetProviders([event.target.value])}
           />
         </FormControl>
         <FormControl>
@@ -213,7 +212,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
           <Input
             type='text'
             value={widgetChildren}
-            onChange={(event) => setWidgetChildren(event.target.value)}
+            onChange={(event) => setWidgetChildren([event.target.value])}
           />
         </FormControl>
         <FormControl>
