@@ -1,4 +1,4 @@
-import { Widget } from '@tinystacks/ops-model';
+import { TinyStacksError, Widget } from '@tinystacks/ops-model';
 import { JSONSchema7 } from 'json-schema';
 
 export type WidgetMap = { [id: string]: Widget };
@@ -11,9 +11,9 @@ export type GetWidgetArguments = {
   dashboardId?: string;
   parameters?: Json;
 };
-export type ShowableError = {
+
+export type ShowableError = Omit<TinyStacksError, 'name' | 'status' | 'type'> & {
   title: string;
-  message: string;
 }
 
 export type FlatSchema = JSONSchema7 & {

@@ -1,4 +1,4 @@
-import { selectConsoleName, selectDashboards, updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
+import { dismissError, handleError, selectConsoleName, selectDashboards, selectError, updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
@@ -9,8 +9,9 @@ import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { SettingsIcon } from '@chakra-ui/icons';
 import { useTranslation } from 'react-i18next';
 import DashboardSettings from 'ops-frontend/components/dashboard/dashboard-settings';
-import { Dashboard } from '@tinystacks/ops-model';
+import { ApiError, Dashboard } from '@tinystacks/ops-model';
 import { useNavigate } from 'react-router-dom';
+import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
 
 export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboardId: string }) {
   const { dashboardContents, dashboardId } = props;
@@ -19,6 +20,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
   const consoleName = useAppSelector(selectConsoleName);
   const [retryCount, setRetryCount] = useState<number>(0);
   const { t } = useTranslation('dashboard');
+  const error = useAppSelector(selectError);
 
   const dispatch = useAppDispatch();
 
@@ -38,6 +40,13 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
       }
     } catch (e) {
       setRetryCount(retryCount + 1);
+      if (retryCount >= 2) {
+        const error = (e as any).body as ApiError;
+        dispatch(handleError({
+          title: 'Failed to fetch console!',
+          error: error?.body || error
+        }));
+      }
     }
   }
 
@@ -90,11 +99,23 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
     )
   }
 
+  let errorBanner = (<></>);
+  if (error) {
+    errorBanner = (
+      <DismissableErrorBanner
+        key='dashboard-wrapper-error'
+        error={error}
+        dismissError={() => dispatch(dismissError())}
+      />
+    );
+  }
+
   return (
     <>
       <HeaderLayout>
         {renderHeader()}
       </HeaderLayout>
+      {errorBanner}
       <FullpageLayout>
         <Stack data-testid='console-page-contents'>
           {content}
