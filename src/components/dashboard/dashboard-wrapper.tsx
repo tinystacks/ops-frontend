@@ -2,7 +2,7 @@ import { dismissError, handleError, selectConsoleName, selectDashboards, selectE
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Button, Flex, Heading, Stack, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Stack, Text, useDisclosure } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
@@ -13,8 +13,14 @@ import { ApiError, Dashboard } from '@tinystacks/ops-model';
 import { useNavigate } from 'react-router-dom';
 import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
 
-export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboardId: string }) {
-  const { dashboardContents, dashboardId } = props;
+export type DashboardWrapperProps = {
+  dashboardId: string;
+  description?: string;
+  dashboardContents: ReactNode;
+}
+
+export function DashboardWrapper(props: DashboardWrapperProps) {
+  const { dashboardContents, dashboardId, description } = props;
   const navigate = useNavigate();
   const dashboards = useAppSelector(selectDashboards);
   const consoleName = useAppSelector(selectConsoleName);
@@ -70,20 +76,21 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
 
   function renderHeader() {
     return (
-      <>
-      <Flex justify='space-between'>
-        <Heading>{dashboardId}</Heading>
-        <Button
-          aria-label={'update-dashboard'}
-          leftIcon={<SettingsIcon />}
-          variant='outline'
-          colorScheme='gray'
-          onClick={settingsOnOpen}
-        >
-          {t('dashboardSettings')}
-        </Button>
-      </Flex>
-      </>
+      <Box>
+        <Flex justify='space-between'>
+          <Heading>{dashboardId}</Heading>
+          <Button
+            aria-label={'update-dashboard'}
+            leftIcon={<SettingsIcon />}
+            variant='outline'
+            colorScheme='gray'
+            onClick={settingsOnOpen}
+          >
+            {t('dashboardSettings')}
+          </Button>
+        </Flex>
+        <Text fontSize='large'>{description}</Text>
+      </Box>
     );
   }
 

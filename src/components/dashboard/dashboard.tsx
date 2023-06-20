@@ -143,6 +143,7 @@ function Dashboard() {
     <DashboardWrapper
       dashboardContents={renderDashboard()}
       dashboardId={dashboardId}
+      description={dashboard?.description}
     />
   )
 }

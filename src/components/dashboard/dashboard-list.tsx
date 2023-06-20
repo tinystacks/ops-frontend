@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Spacer,
+  Spinner,
   useDisclosure,
   Wrap
 } from '@chakra-ui/react';
@@ -36,14 +37,17 @@ export function DashboardList () {
   const dispatch = useAppDispatch();
   const [consolesError, setConsolesError] = useState<ShowableError | undefined>(undefined);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   async function fetchData() {
     try {
+      setIsLoading(true);
       setConsolesError(undefined);
       const consoles = await apis.getConsoles();
       if (Array.isArray(consoles)) {
         // FIXME: we need to eventually only deal with a single console
         dispatch(updateConsole(consoles[0]));
         setRetryCount(0);
+        setIsLoading(false);
       }
     } catch (e: any) {
       const {
@@ -58,6 +62,7 @@ export function DashboardList () {
         context
       });
       setRetryCount(retryCount + 1);
+      setIsLoading(false);
     }
   }
 
@@ -122,6 +127,11 @@ export function DashboardList () {
     );
   }
 
+  let loader = (<></>);
+  if (isLoading) {
+    loader = <Spinner />
+  }
+
 
   return (
     <>
@@ -132,6 +142,7 @@ export function DashboardList () {
       {errorBanner}
       <FullpageLayout>
         <Wrap data-testid='console-page-contents' spacing="6" maxWidth="7xl">
+          {loader}
           {cards}
         </Wrap>
       </FullpageLayout>

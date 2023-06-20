@@ -200,7 +200,13 @@ export function selectDashboards(state: RootState): { [id: string]: Dashboard } 
 export function selectDashboardIdFromRoute(route: string) {
   return function (state: RootState): string {
     const { dashboards } = state.console;
-    const dashboardId = Object.keys(dashboards).find(dashboard => dashboards[dashboard].route === route);
+    const dashboardId = Object.keys(dashboards).find((id) => {
+      const r = dashboards[id].route;
+      const dashboardRoute = r.startsWith('/') ?
+        r.replace(/^(\/+)/, '') :
+        r;
+       return dashboardRoute === route;
+    });
     return dashboardId || '';
   }
 }
