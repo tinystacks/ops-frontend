@@ -9,11 +9,15 @@ import apis from 'ops-frontend/utils/apis';
 import { selectWidget, updateHydratedWidget, updateWidget } from 'ops-frontend/store/consoleSlice';
 import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
 import { useSelector } from 'react-redux';
-import { Json } from 'ops-frontend/types';
+import { FlatSchema, Json } from 'ops-frontend/types';
+import WidgetProperty from 'ops-frontend/components/widget/widget-propety';
+import { doNothing } from 'ops-frontend/utils/do-nothing';
+import isPlainObject from 'lodash.isplainobject';
 
 export default function EditWidgetModal(props: {
   console: string;
   widgetId: string;
+  widgetProperties?: FlatSchema[];
   dashboardId?: string;
   parameters?: Json;
 }) {
@@ -25,6 +29,7 @@ export default function EditWidgetModal(props: {
   const {
     console,
     widgetId,
+    widgetProperties,
     dashboardId,
     parameters
   } = props;
@@ -68,6 +73,63 @@ export default function EditWidgetModal(props: {
     onClose();
   }
 
+  function updateWidgetProperty (key: string, newValue: string) {
+    const widgetJson = JSON.parse(value);
+    widgetJson[key] = newValue;
+    setValue(JSON.stringify(widgetJson));
+  }
+
+  let widgetInputs = [
+    <Textarea
+      key={`widget-input-${widget.id}`}
+      value={value}
+      onChange={handleInputChange}
+      size='sm'
+    />
+  ];
+
+  if (widgetProperties) {
+    const widgetJson = JSON.parse(value);
+    widgetInputs = [
+      <WidgetProperty
+        key={`${widgetJson.id}-id`}
+        name='id'
+        value={widgetJson.id}
+        setter={doNothing}
+        isDisabled
+        isRequired
+      />,
+      <WidgetProperty
+        key={`${widgetJson.id}-type`}
+        name='type'
+        value={widgetJson.type}
+        setter={doNothing}
+        isDisabled
+        isRequired
+      />
+    ]; 
+    
+    widgetInputs.push(...widgetProperties.map((widgetProperty: FlatSchema) => {
+      const {
+        name,
+        isRequired
+      } = widgetProperty;
+      const propertyValue = widgetJson[name];
+      const inputValue = isPlainObject(propertyValue) || Array.isArray(propertyValue) ?
+        JSON.stringify(propertyValue) :
+        propertyValue;
+      return (
+        <WidgetProperty
+          key={`widget-input-${name}`}
+          name={name}
+          value={inputValue}
+          setter={updateWidgetProperty}
+          isRequired={isRequired}
+        />
+      );
+    }));
+  }
+
   return (
     <>
       <MenuItem onClick={onOpen}>
@@ -82,13 +144,7 @@ export default function EditWidgetModal(props: {
           <DynamicModalBody
             error={error}
             loading={loading}
-            body={
-              <Textarea
-                value={value}
-                onChange={handleInputChange}
-                size='sm'
-              />
-            }
+            body={widgetInputs}
           />
           <ModalFooter>
             <Button mr={3} onClick={resetAndClose}>
