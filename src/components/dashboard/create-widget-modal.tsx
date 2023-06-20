@@ -20,7 +20,6 @@ import isEmpty from 'lodash.isempty';
 import React from 'react';
 import apis from 'ops-frontend/utils/apis';
 import { useState } from 'react';
-import { t } from 'i18next';
 import { createWidget, selectDashboardWidgets } from 'ops-frontend/store/consoleSlice';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { useSelector } from 'react-redux';
@@ -68,11 +67,11 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
     const nameIsInvalid = allowedCharacters.test(widgetId);
     if (nameIsInvalid) {
       setWidgetIdIsInvalid(nameIsInvalid);
-      const nameCharacterMessage = t('nameCharacterMessage');
+      const nameCharacterMessage = 'Widget ids must only contain alphanumeric characters';
       setWidgetError(nameCharacterMessage);
-    } else if (widgets.find(widget => widget.id = widgetId)) {
+    } else if (widgets.find(widget => widget.id === widgetId)) {
       setWidgetIdIsInvalid(true);
-      const uniqueMessage = t('uniqueMessage');
+      const uniqueMessage = 'Widget already exists with this id';
       setWidgetError(uniqueMessage);
     } else {
       setWidgetIdIsInvalid(false);
