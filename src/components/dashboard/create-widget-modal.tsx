@@ -14,7 +14,7 @@ import {
   SimpleGrid,
   GridItem,
   IconButton,
-  useDisclosure
+  Select
 } from '@chakra-ui/react';
 import isEmpty from 'lodash.isempty';
 import React from 'react';
@@ -28,18 +28,21 @@ import { AddIcon } from '@chakra-ui/icons'
 
 type CreateWidgetModalProps = {
   isOpen: boolean;
+  onClose: () => void;
   consoleName: string;
   dashboardId: string;
+  widgetTypes: string[];
 };
-
-//need a way for them to add property names, plus value
 
 export default function CreateWidgetModal(props: CreateWidgetModalProps) {
   const {
     isOpen,
+    onClose,
     consoleName,
-    dashboardId
+    dashboardId, 
+    widgetTypes
   } = props;
+
 
   const dispatch = useAppDispatch();
 
@@ -47,19 +50,17 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
   const [widgetDisplayName, setWidgetDisplayName] = useState<string>(); //required
   const [widgetRegion, setWidgetRegion] = useState<string>(); 
   const [widgetProviders, setWidgetProviders] =  useState<string[]>(); 
+  const [widgetChildren, setWidgetChildren] =  useState<string[]>(); 
   const [widgetType, setWidgetType] =  useState<string>(); //required
   const [widgetProperties, setWidgetProperties] = useState<{key: string, value: any}[]>([]);
   //need a way to add tyep location to dep list
   const [widgetIdIsInvalid, setWidgetIdIsInvalid] = useState<boolean>(false);
   const [widgetIdError, setWidgetError] = useState<string | undefined>(undefined);
-  //const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
-  const { onClose } = useDisclosure();
 
 
 
   const widgets = useSelector(selectDashboardWidgets(dashboardId));
-  //console.log('widgets: ', widgets);
 
   function updateWidgetId (widgetId: string) {
     setWidgetId(widgetId);
@@ -82,16 +83,13 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
 
   function updateWidgetRegion(region: string){ 
     setWidgetRegion(region); 
-
-    //validate region
   }
 
 
   const addProperty = () => {
     const properties = [...widgetProperties];
     properties.push({key: '', value: ''})
-    setWidgetProperties(properties); //
-    //setter(name, newValue);
+    setWidgetProperties(properties);
   }
 
   const onChangePropertyKey = (index: number) => (event: any) => {
@@ -105,12 +103,6 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
     properties[index].value = event.target.value;
     setWidgetProperties(properties);
   }
-
-  /*const onDeleteProperty = (index: number) => (event: any) => { 
-    const properties = [...widgetProperties];
-    properties.splice(index, 1); 
-    setWidgetProperties(properties);
-  }*/
 
   const widgetKeyValues = (item: {key: string, value: string}, index: number) => {
     return (
@@ -136,12 +128,10 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
 
   async function resetAndClose() {
     setError(undefined);
-    //console.log('closinggg');
     onClose();
   }
 
   async function onSaveClick() {
-    //setLoading(true);
     setError(undefined);
     try {
       const widget = { 
@@ -149,23 +139,30 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
         displayName: widgetDisplayName,
         type: widgetType, 
         region: widgetRegion, 
-        providers: widgetProviders
+        providerIds: widgetProviders || [], 
+        childrenIds: widgetChildren || []
       };
 
       widgetProperties.forEach(item => {
         widget[item.key as keyof typeof widget] = item.value;
       });
       const createdWidget = await apis.createWidget(consoleName, widget);
-      //console.log('createdWidget: ', createdWidget);
+      
       dispatch(createWidget(createdWidget));
     } catch (e) {
-      setError('');
+      setError(`Error creating widget: ${e}`);
     }
-    //setLoading(false);
-    //onClose();
+    onClose();
   }
 
   const extraProperties = widgetProperties.map((item, index) => widgetKeyValues(item, index));
+
+  const typeOptions = widgetTypes.map(item => {
+    return (
+      <option value={item} key={item}> {item} </option>
+    )
+  });
+
 
   return (
     <Modal isOpen={isOpen} onClose={resetAndClose}>
@@ -212,12 +209,18 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
           />
         </FormControl>
         <FormControl>
-          <FormLabel>{'Widget Type'}</FormLabel>
+          <FormLabel>{'Widget Children'}</FormLabel>
           <Input
             type='text'
-            value={widgetType}
-            onChange={(event) => setWidgetType(event.target.value)}
+            value={widgetChildren}
+            onChange={(event) => setWidgetChildren(event.target.value)}
           />
+        </FormControl>
+        <FormControl>
+          <FormLabel>{'Widget Type'}</FormLabel>
+          <Select size='md' onChange={(event) => setWidgetType(event.target.value)} placeholder='Select option'>
+          {typeOptions}
+          </Select>
         </FormControl>
         {extraProperties}
         <Button

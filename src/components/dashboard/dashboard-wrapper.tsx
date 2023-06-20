@@ -1,12 +1,12 @@
-import { selectConsoleName, selectDashboards, updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
+import { selectConsoleName, selectDashboards, selectDependencies, updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Button, Flex, Heading, Stack, useDisclosure } from '@chakra-ui/react';
+import { Button, Flex, Heading, Stack, useDisclosure, ButtonGroup, IconButton } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { SettingsIcon } from '@chakra-ui/icons';
+import { SettingsIcon, AddIcon } from '@chakra-ui/icons';
 import { useTranslation } from 'react-i18next';
 import DashboardSettings from 'ops-frontend/components/dashboard/dashboard-settings';
 import { Dashboard } from '@tinystacks/ops-model';
@@ -18,6 +18,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
   const navigate = useNavigate();
   const dashboards = useAppSelector(selectDashboards);
   const consoleName = useAppSelector(selectConsoleName);
+  const dependencies = useAppSelector(selectDependencies);
   const [retryCount, setRetryCount] = useState<number>(0);
   const { t } = useTranslation('dashboard');
 
@@ -31,7 +32,8 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
 
   const {
     isOpen: createIsOpen,
-    onOpen: createOnOpen
+    onOpen: createOnOpen, 
+    onClose
   } = useDisclosure();
   
   async function fetchData() {
@@ -68,8 +70,10 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
   const createWidgetModal = createIsOpen ? (
     <CreateWidgetModal
       isOpen={createIsOpen}
+      onClose={onClose}
       consoleName={consoleName}
       dashboardId={dashboardId}
+      widgetTypes={Object.keys(dependencies)}
     />
   ) : (<></>);
 
@@ -78,6 +82,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
       <>
       <Flex justify='space-between'>
         <Heading>{dashboardId}</Heading>
+        <ButtonGroup size='md' isAttached variant='outline'>
         <Button
           aria-label={'update-dashboard'}
           leftIcon={<SettingsIcon />}
@@ -87,15 +92,10 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
         >
           {t('dashboardSettings')}
         </Button>
-        <Button
-          aria-label={'create-widget'}
-          leftIcon={<SettingsIcon />}
-          variant='outline'
+            <IconButton aria-label='Create Widget' icon={<AddIcon />} variant='outline'
           colorScheme='gray'
-          onClick={createOnOpen}
-        >
-          {'Create Widget'}
-        </Button>
+          onClick={createOnOpen} />
+        </ButtonGroup>
       </Flex>
       </>
     );

@@ -14,6 +14,9 @@ import { WidgetDropdownProperty, WidgetListProperty, WidgetProperty } from 'ops-
 import { doNothing } from 'ops-frontend/utils/do-nothing';
 import isPlainObject from 'lodash.isplainobject';
 
+const CHILDREN_ID_PROPERTY = 'childrenIds'; 
+const PROVIDER_ID_PROPERTY = 'providerIds';
+
 export default function EditWidgetModal(props: {
   Console: string;
   widgetId: string;
@@ -56,7 +59,6 @@ export default function EditWidgetModal(props: {
     setLoading(true);
     setError(undefined);
     try {
-      //console.log('updated: ',JSON.parse(value) );
       const updatedWidget = await apis.updateWidget(Console, widget.id, JSON.parse(value));
       dispatch(updateWidget(updatedWidget));
       const hydratedUpdatedWidget = await apis.getWidget({
@@ -123,7 +125,7 @@ export default function EditWidgetModal(props: {
         JSON.stringify(propertyValue) :
         propertyValue;
       let widgetPropertyItem; 
-      if(name === 'childrenIds'){ 
+      if(name === CHILDREN_ID_PROPERTY){ 
         widgetPropertyItem = (
           <WidgetDropdownProperty
           key={`widget-input-${name}`}
@@ -136,7 +138,7 @@ export default function EditWidgetModal(props: {
         ); 
 
 
-      } else if(name === 'providerIds'){
+      } else if(name === PROVIDER_ID_PROPERTY){
         widgetPropertyItem = (
           <WidgetDropdownProperty
           key={`widget-input-${name}`}
