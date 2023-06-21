@@ -67,7 +67,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <Box className='widgetHeader'>
       <Flex>
       <IconButton 
-        variant='outline'
+        variant='link'
         size='md'
         colorScheme='black'
         onClick={onToggle}
