@@ -72,7 +72,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
         colorScheme='black'
         onClick={onToggle}
         aria-label={isOpen ? 'downCaret' : 'upCaret'} 
-        align='left'
+        float='left'
         icon={isOpen ? <ChevronDownIcon/> : <ChevronUpIcon />} 
         />  
         <Center>    
