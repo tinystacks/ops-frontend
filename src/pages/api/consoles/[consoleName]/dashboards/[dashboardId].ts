@@ -12,16 +12,16 @@ export default async function handler(
     const client = await getOpsApiClient();
     const dashboardClient = client.dashboard;
     const consoleName = req.query.consoleName as string;
-    const pageId = req.query.pageId as string;
+    const dashboardId = req.query.dashboardId as string;
     const method = req.method;
 
     switch (method) {
       case 'PUT':
-        const updateResponse = await dashboardClient.updateDashboard(consoleName, pageId, req.body);
+        const updateResponse = await dashboardClient.updateDashboard(consoleName, dashboardId, req.body);
         handleResponse<Dashboard | TinyStacksError>(updateResponse, res);
         break;
       case 'DELETE':
-        const deleteResponse = await dashboardClient.deleteDashboard(consoleName, pageId);
+        const deleteResponse = await dashboardClient.deleteDashboard(consoleName, dashboardId);
         handleResponse<Dashboard | TinyStacksError>(deleteResponse, res);
         break;
       default:

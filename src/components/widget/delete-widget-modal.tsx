@@ -53,7 +53,7 @@ export default function DeleteWidgetModal(props: { console: string, widget: Widg
           <DynamicModalBody
             loading={loading}
             error={error}
-            body={<>{widgetMsg('deleteConfirmation', { ...widget })}</>}
+            body={[<>{widgetMsg('deleteConfirmation', { ...widget })}</>]}
           />
           <ModalFooter>
             <Button mr={3} onClick={onClose}>

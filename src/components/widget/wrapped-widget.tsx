@@ -11,7 +11,7 @@ import { BaseWidget } from '@tinystacks/ops-core';
 import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Json } from 'ops-frontend/types';
+import { FlatSchema, Json } from 'ops-frontend/types';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
@@ -21,6 +21,7 @@ export type WrappedWidgetProps = {
   widget: Widget,
   childrenWidgets: (Widget & { renderedElement: JSX.Element })[],
   onRefresh: () => void | Promise<void>,
+  widgetProperties?: FlatSchema[];
   dashboardId?: string,
   parameters?: Json
 };
@@ -35,6 +36,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     hydratedWidget,
     widget,
     childrenWidgets,
+    widgetProperties,
     dashboardId,
     parameters
   } = props;
@@ -104,6 +106,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
                 key={`${widget.id}-edit`}
                 console={consoleName}
                 widgetId={widget.id}
+                widgetProperties={widgetProperties}
                 dashboardId={dashboardId}
                 parameters={parameters}
               />
