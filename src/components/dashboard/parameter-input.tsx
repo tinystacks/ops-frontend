@@ -1,8 +1,9 @@
 import { Parameter } from '@tinystacks/ops-model';
 import {
-  Box,
   Checkbox,
+  Flex,
   FormControl,
+  FormErrorMessage,
   FormHelperText,
   FormLabel,
   Input,
@@ -20,7 +21,10 @@ type ParameterInputProps = {
   sensitive?: boolean;
   helperText?: string;
   propKey: string;
-  setter: (key: string, newValue: any) => void
+  setter: (key: string, newValue: any) => void,
+  isInvalid?: boolean;
+  errorMessage?: string;
+  rightActionButton?: JSX.Element;
 };
 
 type FormType = 'password' | 'text' | 'number' | 'datetime-local' | 'checkbox';
@@ -47,7 +51,7 @@ function NumInput (props: ParameterInputProps) {
     setter
   } = props;
   return (
-    <NumberInput value={value} onChange={(newValue) => setter(propKey, newValue)}>
+    <NumberInput value={value} onChange={(newValue) => setter(propKey, newValue)} w='full'>
       <NumberInputField />
       <NumberInputStepper>
         <NumberIncrementStepper />
@@ -64,7 +68,10 @@ export default function ParameterInput (props: ParameterInputProps) {
     inputType,
     helperText,
     propKey,
-    setter
+    setter,
+    isInvalid,
+    errorMessage,
+    rightActionButton
   } = props;
 
   const formType = getFormType(inputType);
@@ -73,9 +80,13 @@ export default function ParameterInput (props: ParameterInputProps) {
   switch (formType) {
     case 'text':
       input = (
-        <Input type={formType} value={value} data-form-type='other' onChange={(event) => {
-          setter(propKey, event.target.value)}
-        } />
+        <Input
+          type={formType}
+          value={value}
+          data-form-type='other'
+          onChange={(event) => { setter(propKey, event.target.value)} }
+          w='full'
+        />
       );
       break;
     case 'number':
@@ -85,27 +96,39 @@ export default function ParameterInput (props: ParameterInputProps) {
       break;
     case 'checkbox':
       input = (
-        <Checkbox isChecked={value} onChange={(event) => setter(propKey, event.target.checked)}/>
+        <Checkbox isChecked={value} onChange={(event) => setter(propKey, event.target.checked)} w='full' />
       );
       break;
     case 'datetime-local':
       input = (
-        <Input type={formType} value={value} data-form-type='other' onChange={(event) => {
-          setter(propKey, event.target.value)}
-        } />
+        <Input
+          type={formType}
+          value={value}
+          data-form-type='other'
+          onChange={(event) => { setter(propKey, event.target.value)} }
+          w='full'
+        />
       );
       break;
     default:
       break;
 
   }
+
+  let footer = (<FormHelperText>{helperText || ''}</FormHelperText>);
+  if (isInvalid) {
+    footer = (<FormErrorMessage>{errorMessage || ''}</FormErrorMessage>)
+  }
   return (
-    <Box p='2' maxW='full' minW='md'>
-      <FormControl>
-        <FormLabel>{label}</FormLabel>
+    <FormControl
+      isInvalid={isInvalid}
+    >
+      <FormLabel>{label}</FormLabel>
+      <Flex>
         {input}
-        <FormHelperText>{helperText || ''}</FormHelperText>
-      </FormControl>
-    </Box>
+        {rightActionButton}
+      </Flex>
+      {footer}
+    </FormControl>
   );
 }
