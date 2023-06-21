@@ -10,7 +10,9 @@ import { selectConsoleWidgets, selectProviders, selectWidget, updateHydratedWidg
 import DynamicModalBody from 'ops-frontend/components/modal/dynamic-modal-body';
 import { useSelector } from 'react-redux';
 import { FlatSchema, Json } from 'ops-frontend/types';
-import { WidgetDropdownProperty, WidgetListProperty, WidgetProperty } from 'ops-frontend/components/widget/widget-propety';
+import { WidgetProperty } from 'ops-frontend/components/widget/widget-properties/widget-propety';
+import { WidgetDropdownProperty } from 'ops-frontend/components/widget/widget-properties/widget-dropdown-property';
+import { WidgetListProperty } from 'ops-frontend/components/widget/widget-properties/widget-list-property';
 import { doNothing } from 'ops-frontend/utils/do-nothing';
 import isPlainObject from 'lodash.isplainobject';
 

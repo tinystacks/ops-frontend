@@ -214,7 +214,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
             onChange={(event) => setWidgetChildren([event.target.value])}
           />
         </FormControl>
-        <FormControl>
+        <FormControl isRequired>
           <FormLabel>{'Widget Type'}</FormLabel>
           <Select size='md' onChange={(event) => setWidgetType(event.target.value)} placeholder='Select option'>
           {typeOptions}

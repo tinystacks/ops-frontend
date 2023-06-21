@@ -268,7 +268,7 @@ async function renderWidget(
       {
         ...widget,
         originalType: widget.type,
-        error: (widget as TinyStacksError).message || ''
+        error: (widget as unknown as TinyStacksError).message || ''
       }
     )
   } else if (widget.type === 'LoadingWidget') {

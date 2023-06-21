@@ -1,8 +1,10 @@
-import { selectConsoleName, selectDashboards, selectDependencies, updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
+import { selectConsoleName, selectDashboards, selectDependencies, 
+  updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Button, Flex, Heading, Stack, useDisclosure, ButtonGroup, IconButton } from '@chakra-ui/react';
+import { Button, Flex, Heading, Stack, useDisclosure, ButtonGroup, IconButton,
+  Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
@@ -12,6 +14,7 @@ import DashboardSettings from 'ops-frontend/components/dashboard/dashboard-setti
 import { Dashboard } from '@tinystacks/ops-model';
 import { useNavigate } from 'react-router-dom';
 import CreateWidgetModal from 'ops-frontend/components/dashboard/create-widget-modal';
+import AddExistingWidgetModal from 'ops-frontend/components/dashboard/add-existing-widget-modal';
 
 export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboardId: string }) {
   const { dashboardContents, dashboardId } = props;
@@ -35,6 +38,13 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
     onOpen: createOnOpen, 
     onClose
   } = useDisclosure();
+
+  const {
+    isOpen: addExistingIsOpen,
+    onOpen: addExistingOnOpen, 
+    onClose: addExsitingOnClose
+  } = useDisclosure();
+  
   
   async function fetchData() {
     try {
@@ -77,6 +87,16 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
     />
   ) : (<></>);
 
+  const addWidgetModel = addExistingIsOpen ? ( 
+    <AddExistingWidgetModal
+    isOpen={addExistingIsOpen}
+    onClose={addExsitingOnClose}
+    consoleName={consoleName}
+    dashboardId={dashboardId}
+    />
+
+  ) : (<></>);
+
   function renderHeader() {
     return (
       <>
@@ -92,9 +112,14 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
         >
           {t('dashboardSettings')}
         </Button>
-            <IconButton aria-label='Create Widget' icon={<AddIcon />} variant='outline'
-          colorScheme='gray'
-          onClick={createOnOpen} />
+        <Menu>
+          <MenuButton as={IconButton} aria-label='Create or Add Widget' 
+          icon={<AddIcon />} variant='outline' colorScheme='gray' />
+          <MenuList>
+            <MenuItem onClick={createOnOpen} >Create</MenuItem>
+            <MenuItem onClick={addExistingOnOpen}>Add Existing</MenuItem>
+          </MenuList>
+        </Menu>
         </ButtonGroup>
       </Flex>
       </>
@@ -116,6 +141,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
   return (
     <>
       {createWidgetModal}
+      {addWidgetModel}
       <HeaderLayout>
         {renderHeader()}
       </HeaderLayout>
