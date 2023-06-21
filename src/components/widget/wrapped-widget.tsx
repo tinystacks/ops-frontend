@@ -66,17 +66,17 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <></> :
     <Box className='widgetHeader'>
       <Flex>
-        <Center>
-        <Button
-            variant='link'
-            onClick={onToggle}
-            aria-label={isOpen ? 'downCaret' : 'upCaret'}
-            rightIcon={isOpen ? <ChevronDownIcon/> : <ChevronUpIcon />}
-            size='lg'
-            colorScheme='black'
-          >
-          </Button>
-          <Heading as='h4' size='md'>
+      <IconButton 
+        variant='outline'
+        size='md'
+        colorScheme='black'
+        onClick={onToggle}
+        aria-label={isOpen ? 'downCaret' : 'upCaret'} 
+        align='left'
+        icon={isOpen ? <ChevronDownIcon/> : <ChevronUpIcon />} 
+        />  
+        <Center>    
+        <Heading as='h4' size='md'>
             { widget.displayName || widget.id}
           </Heading>
         </Center>
