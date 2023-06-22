@@ -6,12 +6,13 @@ import { Widget } from '@tinystacks/ops-model';
 import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
 import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
+import { selectConsoleName, selectDashboard, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
 import { FlatSchema, Json } from 'ops-frontend/types';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
+import RemoveWidgetOption from 'ops-frontend/components/widget/remove-widget-option';
 
 
 export type WrappedWidgetProps = {
@@ -19,14 +20,11 @@ export type WrappedWidgetProps = {
   widget: Widget;
   childrenWidgets: (Widget & { renderedElement: JSX.Element })[];
   widgetProperties?: FlatSchema[];
-  dashboardId?: string;
+  dashboardId: string;
   parameters?: Json;
 };
 
 export default function WrappedWidget(props: WrappedWidgetProps) {
-  // redux
-  const dispatch = useAppDispatch();
-  const consoleName = useAppSelector(selectConsoleName);
   // props
   const {
     hydratedWidget,
@@ -36,6 +34,10 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     dashboardId,
     parameters
   } = props;
+  // redux
+  const dispatch = useAppDispatch();
+  const consoleName = useAppSelector(selectConsoleName);
+  const dashboard = useAppSelector(selectDashboard(dashboardId));
 
   function updateOverrides (overrides: any) {
     dispatch(updateHydratedWidget(new LoadingWidget({ 
@@ -88,6 +90,11 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
                 parameters={parameters}
               />
               <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget} />
+              <RemoveWidgetOption
+                consoleName={consoleName}
+                dashboard={dashboard}
+                widgetId={widget.id}
+              />
             </MenuList>
           </Menu>
         </Box>
