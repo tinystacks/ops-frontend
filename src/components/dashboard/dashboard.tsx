@@ -112,6 +112,8 @@ function Dashboard() {
             widget,
             hydratedWidgets,
             dependencies,
+            consoleName, 
+            dispatch,
             dashboardId,
             parameters
           );
@@ -148,7 +150,8 @@ function Dashboard() {
     parameters,
     router.isReady,
     dispatch,
-    dashboard?.widgetIds
+    dashboard?.widgetIds,
+    consoleName
   ]);
 
   function renderDashboard() {
@@ -207,7 +210,7 @@ export async function fetchWidgetsForDashboard(args: {
   for (const widget of widgetsFetchList) {
     // TODO: dispatch a loading widget
     dispatch(updateHydratedWidget(new LoadingWidget({ ...widget, originalType: widget.type }).toJson()));
-    void apis.getWidget({
+    await apis.getWidget({
       consoleName,
       widget,
       dashboardId,
@@ -260,11 +263,13 @@ async function renderWidgetAndChildren(
   hydratedWidgets: WidgetMap,
   dependencies: FlatMap,
   dashboardId: string,
+  consoleName: string, 
+  dispatch: AppDispatch,
   parameters?: Json
 ): Promise<JSX.Element> {
   const { childrenIds } = widget;
   if (!childrenIds || isEmpty(childrenIds)) {
-    return await renderWidget(widget, [], dependencies, dashboardId, parameters);
+    return await renderWidget(widget, [], dependencies, consoleName, dispatch, dashboardId, parameters);
   }
 
   // TODO: Throw if missing
@@ -274,12 +279,45 @@ async function renderWidgetAndChildren(
   for (const child of children) {
     renderedChildren.push({
       ...widget,
-      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets, dependencies, dashboardId, parameters)
+      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets, dependencies, 
+        consoleName, dispatch, dashboardId, parameters)
     });
   }
 
-  return await renderWidget(widget, renderedChildren, dependencies, dashboardId, parameters);
+  return await renderWidget(widget, renderedChildren, dependencies, consoleName, dispatch, dashboardId, parameters);
 }
+
+async function getWidgetOnRefresh(args: {
+  consoleName: string;
+  widget: Widget;
+  dispatch: AppDispatch;
+  dashboardId?: string;
+  parameters?: Json
+}) {
+  const {
+    consoleName,
+    widget,
+    dispatch,
+    dashboardId,
+    parameters
+  } = args;
+  
+  dispatch(updateHydratedWidget(new LoadingWidget({ ...widget, originalType: widget.type }).toJson()));
+
+  await apis.getWidget({
+    consoleName,
+    widget,
+    dashboardId,
+    parameters
+  }).then(renderWidget => dispatch(updateHydratedWidget(renderWidget)))
+    .catch((e: any) => dispatch(updateHydratedWidget(new ErrorWidget({
+      ...widget,
+      originalType: widget.type,
+      error: e.message
+    }).toJson())));
+
+}
+
 
 function getSchemaProperties (schema: JSONSchema7, requiredProperties: string[]): FlatSchema[] {
   return Object.entries(schema.properties || {}).map(
@@ -299,6 +337,8 @@ async function renderWidget(
   children: (Widget & { renderedElement: JSX.Element })[],
   dependencies: FlatMap,
   dashboardId: string,
+  consoleName: string, 
+  dispatch: AppDispatch,
   parameters?: Json
 ): Promise<JSX.Element> {
   let hydratedWidget;
@@ -371,6 +411,15 @@ async function renderWidget(
     widgetProperties={widgetProperties}
     dashboardId={dashboardId}
     parameters={parameters}
+    onRefresh={async () => 
+      {
+      await  getWidgetOnRefresh({
+      consoleName, 
+      dispatch,
+      widget,
+      dashboardId, 
+      parameters
+    })}}
   />;
 }
 

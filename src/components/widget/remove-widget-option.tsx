@@ -8,9 +8,9 @@ import { updateDashboard } from 'ops-frontend/store/consoleSlice';
 import { Dashboard } from '@tinystacks/ops-model';
 
 export type RemoveWidgetOptionProps = {
-  consoleName: string,
-  dashboard: Dashboard,
-  widgetId: string
+  consoleName: string;
+  dashboard?: Dashboard;
+  widgetId: string;
 }
 
 export default function RemoveWidgetOption(props: RemoveWidgetOptionProps) {
@@ -23,12 +23,12 @@ export default function RemoveWidgetOption(props: RemoveWidgetOptionProps) {
   // props
   const {
     consoleName,
-    dashboard,
+    dashboard = {} as Dashboard,
     widgetId
   } = props;
 
   async function removeWidgetFromDashboard() {
-    const updatedWidgetIds = dashboard.widgetIds?.filter(wId => wId !== widgetId);
+    const updatedWidgetIds = dashboard?.widgetIds?.filter(wId => wId !== widgetId) || [];
     const updatedDashboard: Dashboard = {
       ...dashboard,
       widgetIds: updatedWidgetIds
