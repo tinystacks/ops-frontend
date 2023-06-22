@@ -6,14 +6,18 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  IconButton,
   Input,
   Stack,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { Dashboard, Parameter } from '@tinystacks/ops-model';
 import isEmpty from 'lodash.isempty';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ParameterInput from 'ops-frontend/components/dashboard/parameter-input';
+import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
+import CreateParameterModal from 'ops-frontend/components/dashboard/create-parameter-modal';
 
 type ValidatedInputProps = {
   label: string;
@@ -82,6 +86,12 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   const [description, setDescription] = useState<string>(dashboard.description || '');
   
   const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
+
+  const {
+    isOpen: createParamIsOpen,
+    onOpen: createParamOnOpen,
+    onClose: createParamOnClose
+  } = useDisclosure();
   
   const otherDashboards: Record<string, Dashboard> = Object.fromEntries(
     Object.entries(allDashboards)
@@ -149,92 +159,131 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
     }
   }
 
+  function createParameter (param: Parameter) {
+    createParamOnClose();
+    const newParams = [...parameters, param];
+    setParameters(newParams);
+  }
+
+  function deleteParameter (name: string) {
+    const params = parameters.filter(p => p.name !== name);
+    setParameters(params);
+  }
+
   return (
-    <Stack flex="1" direction={{ base: 'column' }} align="center" bgColor='gray.100'>
-      <Stack
-        flex="1"
-        align="center"
-        py="4"
-        px={{ base: '4', lg: '8' }}
-        w="full"
-        spacing={3}
-      >
-        <Box
-          className='widget'
+    <>
+      <CreateParameterModal
+        createParameter={createParameter}
+        isOpen={createParamIsOpen}
+        onClose={createParamOnClose}
+        parameters={parameters}
+      />
+      <Stack flex="1" direction={{ base: 'column' }} align="center" bgColor='gray.100'>
+        <Stack
+          flex="1"
+          align="center"
+          py="4"
+          px={{ base: '4', lg: '8' }}
           w="full"
-          minW="lg"
+          spacing={3}
         >
           <Box
-            className='widgetHeader'
-            p='4'
+            className='widget'
+            w="full"
+            minW="lg"
           >
-            <Heading as='h4' size='md'>
-              {t('dashboardSettings')}
-            </Heading>
-          </Box>
-          <Box p='4'>
-            <ValidatedInput
-              label={t('dashboardName')}
-              value={name}
-              onChange={updateName}
-              invalid={nameIsInvalid}
-              error={nameError}
-              disabled
-            />
-            <ValidatedInput
-              label={t('dashboardRoute')}
-              value={route}
-              onChange={updateRoute}
-              invalid={routeIsInvalid}
-              error={routeError}
-            />
-            <ValidatedInput
-              label={t('dashboardDescription')}
-              value={description}
-              onChange={setDescription}
-            />
-            </Box>
             <Box
+              className='widgetHeader'
               p='4'
-              borderBottom='1px'
-              borderColor='gray.100'
             >
-              <Heading as='h4' size='sm'>
-                {t('dashboardParameters')}
+              <Heading as='h4' size='md'>
+                {t('dashboardSettings')}
               </Heading>
             </Box>
             <Box p='4'>
-              {parameters.map(param => (
-                <ParameterInput
-                  key={`${name}-param-${param.name}`}
-                  inputType={param.type || Parameter.type.STRING}
-                  label={param.name}
-                  propKey={param.name}
-                  value={param.default}
-                  setter={updateParameter}
-                />
-              ))}
-              <Flex justifyContent='flex-end' alignContent='end' h='full' paddingTop='5'>
-                <Button variant='ghost' onClick={onClose}>
-                  {tc('close')}
-                </Button>
-                <Button
-                  colorScheme='blue'
-                  mr={3}
-                  onClick={submit}
-                  isDisabled={
-                    nameIsInvalid ||
-                    routeIsInvalid ||
-                    isEmpty(name) ||
-                    isEmpty(route)
-                  }
-                >
-                  {tc('save')}
-                </Button>
-              </Flex>
+              <ValidatedInput
+                label={t('dashboardName')}
+                value={name}
+                onChange={updateName}
+                invalid={nameIsInvalid}
+                error={nameError}
+                disabled
+              />
+              <ValidatedInput
+                label={t('dashboardRoute')}
+                value={route}
+                onChange={updateRoute}
+                invalid={routeIsInvalid}
+                error={routeError}
+              />
+              <ValidatedInput
+                label={t('dashboardDescription')}
+                value={description}
+                onChange={setDescription}
+              />
+              </Box>
+              <Box
+                p='4'
+                borderBottom='1px'
+                borderColor='gray.100'
+              >
+                <Heading as='h4' size='sm'>
+                  {t('dashboardParameters')}
+                </Heading>
+              </Box>
+              <Box p='4'>
+                {parameters.map(param => (
+                  <Box
+                    p='2'
+                    maxW='full'
+                    minW='md'
+                    key={`${name}-param-${param.name}-box`}
+                  >
+                    <ParameterInput
+                      key={`${name}-param-${param.name}`}
+                      inputType={param.type || Parameter.type.STRING}
+                      label={param.name}
+                      propKey={param.name}
+                      value={param.default}
+                      setter={updateParameter}
+                      rightActionButton={<IconButton
+                        aria-label={`Delete ${name} parameter`}
+                        variant='ghost'
+                        icon={<DeleteIcon />}
+                        onClick={() => deleteParameter(param.name)}
+                      />}
+                    />
+                  </Box>
+                ))}
+                  <Button
+                    leftIcon={<AddIcon />}
+                    variant='outline'
+                    onClick={createParamOnOpen}
+                  >
+                    {t('addParam')}
+                  </Button>
+                <Flex justifyContent='flex-end' alignContent='end' h='full' paddingTop='5'>
+                  <Button variant='ghost' onClick={onClose}>
+                    {tc('close')}
+                  </Button>
+                  <Button
+                    colorScheme='blue'
+                    mr={3}
+                    onClick={submit}
+                    isDisabled={
+                      nameIsInvalid ||
+                      routeIsInvalid ||
+                      isEmpty(name) ||
+                      isEmpty(route)
+                    }
+                  >
+                    {tc('save')}
+                  </Button>
+                </Flex>
+            </Box>
           </Box>
-        </Box>
+        </Stack>
       </Stack>
-    </Stack>
+    </>
   );
 };
