@@ -167,7 +167,7 @@ function Dashboard() {
   function renderDashboardWidgets() {
     return (
       <div>
-        {Object.values(renderedWidgets)}
+        {dashboard?.widgetIds?.map(id => renderedWidgets[id])}
       </div>
     );
   }
