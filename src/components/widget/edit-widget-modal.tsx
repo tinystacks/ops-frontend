@@ -20,7 +20,7 @@ const CHILDREN_ID_PROPERTY = 'childrenIds';
 const PROVIDER_ID_PROPERTY = 'providerIds';
 
 export default function EditWidgetModal(props: {
-  Console: string;
+  console: string;
   widgetId: string;
   widgetProperties?: FlatSchema[];
   dashboardId?: string;
@@ -32,7 +32,7 @@ export default function EditWidgetModal(props: {
 
   // props
   const {
-    Console,
+    console,
     widgetId,
     widgetProperties,
     dashboardId,
@@ -61,10 +61,10 @@ export default function EditWidgetModal(props: {
     setLoading(true);
     setError(undefined);
     try {
-      const updatedWidget = await apis.updateWidget(Console, widget.id, JSON.parse(value));
+      const updatedWidget = await apis.updateWidget(console, widget.id, JSON.parse(value));
       dispatch(updateWidget(updatedWidget));
       const hydratedUpdatedWidget = await apis.getWidget({
-        consoleName: Console,
+        consoleName: console,
         widget,
         dashboardId,
         parameters

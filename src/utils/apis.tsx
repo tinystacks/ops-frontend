@@ -77,6 +77,19 @@ const apis = {
     } catch (e) {
       throw dashboards as TinyStacksError;
     }
+  }, 
+  async addWidgetToDashboard(consoleName: string, dashboard: Dashboard, widgetId: string, dashboardId?: string) { 
+    const id = dashboardId || dashboard.id;
+    const widgets = [...dashboard.widgetIds, widgetId];
+    const newDashboard = {...dashboard, widgetIds: widgets}; 
+    const updatedDashboard = await client.dashboard.updateDashboard(consoleName, id, newDashboard);
+
+    try {
+      return updatedDashboard as Dashboard;
+    } catch (e) {
+      throw updatedDashboard as TinyStacksError;
+    }
+
   }
 };
 

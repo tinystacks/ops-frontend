@@ -14,8 +14,8 @@ import {
 import isEmpty from 'lodash.isempty';
 import React from 'react';
 import { useState } from 'react';
-import {  selectConsoleWidgets, selectDashboardWidgets } from 'ops-frontend/store/consoleSlice';
-import { useAppSelector } from 'ops-frontend/store/hooks';
+import {  addWidgetToDashboard, selectConsoleWidgets, selectDashboard, selectDashboardWidgets } from 'ops-frontend/store/consoleSlice';
+import { useAppSelector, useAppDispatch } from 'ops-frontend/store/hooks';
 import { useSelector } from 'react-redux';
 
 
@@ -30,7 +30,8 @@ export default function AddExistingWidgetModal(props: AddWidgetModalProps) {
   const {
     isOpen,
     onClose,
-    dashboardId
+    dashboardId, 
+    consoleName
   } = props;
 
   const [widgetToAdd, setWidgetToAdd] = useState<string>();
@@ -40,11 +41,14 @@ export default function AddExistingWidgetModal(props: AddWidgetModalProps) {
     return widget.id;
   });
   const consoleWidgets = Object.keys(useAppSelector(selectConsoleWidgets));
+  const dashboard = useSelector(selectDashboard(dashboardId));
 
 
   const reducedWidgets = consoleWidgets?.filter((consoleWidget: any) => { 
     return !dashboardWidgets.includes(consoleWidget)
-  })
+  }); 
+  
+  const dispatch = useAppDispatch();
 
 
   async function resetAndClose() {
@@ -55,7 +59,10 @@ export default function AddExistingWidgetModal(props: AddWidgetModalProps) {
   async function onSaveClick() {
     setError(undefined);
     try {
-      //placeholder until we have the appropriate apis
+      if(widgetToAdd){ 
+        await dispatch(addWidgetToDashboard(consoleName, dashboard, widgetToAdd, dashboardId));
+      }
+      
     } catch (e) {
       setError(`Error adding widget ${widgetToAdd} to dashboard: ${e}`);
     }

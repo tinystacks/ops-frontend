@@ -51,6 +51,21 @@ export const updateDashboard = (consoleName: string, dashboard: Dashboard, dashb
     }
   }
 
+  export const addWidgetToDashboard = 
+    (consoleName: string, dashboard: Dashboard, widgetId: string, dashboardId?: string) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      await apis.addWidgetToDashboard(consoleName, dashboard, widgetId, dashboardId);
+      return dispatch(fetchDashboards(consoleName));
+    } catch (e) {
+      const error = (e as any).body as ApiError;
+      return dispatch(handleError({
+        title: 'Failed to add widget to dashboard!',
+        message: error?.body?.message || error?.message
+      }));
+    }
+  }
+
 export const fetchDashboards = (consoleName: string) => async (dispatch: AppDispatch) => {
   try {
     const dashboards = await apis.getDashboards(consoleName);
