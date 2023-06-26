@@ -18,6 +18,7 @@ RUN if [ ! -z "${DEPENDENCIES}" ]; then npm i $DEPENDENCIES; fi;
 RUN node ./generate-plugins-index.js $DEPENDENCIES;
 RUN npm run build
 # RUN rm -rf ./src
+RUN npm dedupe
 RUN npm prune --production
 
 
