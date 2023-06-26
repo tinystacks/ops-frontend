@@ -7,6 +7,8 @@ import { ChakraProvider, CSSReset } from '@chakra-ui/react';
 import { AppLayout } from 'ops-frontend/components/layout/app-layout';
 import { extendTheme } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 export const PURPLE_GRADIENT = 'linear(to-r, lightpurple.500, purple.500)';
 export const PURPLE_GRADIENT_HOVER =
@@ -81,9 +83,11 @@ export default function App({ Component, pageProps }: AppProps) {
     <Provider store={store}>
       <ChakraProvider theme={theme}>
         <CSSReset />
+        <DndProvider backend={HTML5Backend}>
           <AppLayout>
             <Component {...pageProps} />
           </AppLayout>
+        </DndProvider>
       </ChakraProvider>
     </Provider>
   );

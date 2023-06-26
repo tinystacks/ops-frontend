@@ -11,6 +11,7 @@ const dashboards: LocaleMessageType = {
   routeCharacterMessage: 'Dashboard routes must only contain alphanumeric characters and hyphens!',
   dashboardSettings: 'Dashboard Settings',
   dashboardParameters: 'Default Parameter Values',
+  dashboardWidgets: 'Widgets',
   addParam: 'Add Parameter',
   createParameter: 'Create parameter',
   paramName: 'Name',

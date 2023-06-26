@@ -11,13 +11,15 @@ import {
   Stack,
   useDisclosure,
 } from '@chakra-ui/react';
+import update from 'immutability-helper'
 import { Dashboard, Parameter } from '@tinystacks/ops-model';
 import isEmpty from 'lodash.isempty';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ParameterInput from 'ops-frontend/components/dashboard/parameter-input';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
 import CreateParameterModal from 'ops-frontend/components/dashboard/create-parameter-modal';
+import { WidgetRefCard } from 'ops-frontend/components/dashboard/widget-ref-card';
 
 type ValidatedInputProps = {
   label: string;
@@ -86,6 +88,8 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   const [description, setDescription] = useState<string>(dashboard.description || '');
   
   const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
+  
+  const [widgets, setWidgets] = useState<string[]>(dashboard.widgetIds || []);
 
   const {
     isOpen: createParamIsOpen,
@@ -103,7 +107,8 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
       ...dashboard,
       route,
       description,
-      parameters
+      parameters,
+      widgetIds: widgets
     }
     updateDashboard(updatedDashboard);
   }
@@ -170,6 +175,22 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
     setParameters(params);
   }
 
+  function removeWidget (id: string) {
+    const updatedWidgets = widgets.filter(w => w !== id);
+    setWidgets(updatedWidgets);
+  }
+
+  const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
+    setWidgets((prevCards: string[]) =>
+      update(prevCards, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevCards[dragIndex]],
+        ],
+      }),
+    )
+  }, [])
+
   return (
     <>
       <CreateParameterModal
@@ -221,65 +242,88 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
                 value={description}
                 onChange={setDescription}
               />
-              </Box>
-              <Box
-                p='4'
-                borderBottom='1px'
-                borderColor='gray.100'
-              >
-                <Heading as='h4' size='sm'>
-                  {t('dashboardParameters')}
-                </Heading>
-              </Box>
-              <Box p='4'>
-                {parameters.map(param => (
-                  <Box
-                    p='2'
-                    maxW='full'
-                    minW='md'
-                    key={`${name}-param-${param.name}-box`}
-                  >
-                    <ParameterInput
-                      key={`${name}-param-${param.name}`}
-                      inputType={param.type || Parameter.type.STRING}
-                      label={param.name}
-                      propKey={param.name}
-                      value={param.default}
-                      setter={updateParameter}
-                      rightActionButton={<IconButton
-                        aria-label={`Delete ${name} parameter`}
-                        variant='ghost'
-                        icon={<DeleteIcon />}
-                        onClick={() => deleteParameter(param.name)}
-                      />}
-                    />
-                  </Box>
-                ))}
-                  <Button
-                    leftIcon={<AddIcon />}
-                    variant='outline'
-                    onClick={createParamOnOpen}
-                  >
-                    {t('addParam')}
-                  </Button>
-                <Flex justifyContent='flex-end' alignContent='end' h='full' paddingTop='5'>
-                  <Button variant='ghost' onClick={onClose}>
-                    {tc('close')}
-                  </Button>
-                  <Button
-                    colorScheme='blue'
-                    mr={3}
-                    onClick={submit}
-                    isDisabled={
-                      nameIsInvalid ||
-                      routeIsInvalid ||
-                      isEmpty(name) ||
-                      isEmpty(route)
-                    }
-                  >
-                    {tc('save')}
-                  </Button>
-                </Flex>
+            </Box>
+            <Box
+              p='4'
+              borderBottom='1px'
+              borderColor='gray.100'
+            >
+              <Heading as='h4' size='sm'>
+                {t('dashboardParameters')}
+              </Heading>
+            </Box>
+            <Box p='4'>
+              {parameters.map(param => (
+                <Box
+                  p='2'
+                  maxW='full'
+                  minW='md'
+                  key={`${name}-param-${param.name}-box`}
+                >
+                  <ParameterInput
+                    key={`${name}-param-${param.name}`}
+                    inputType={param.type || Parameter.type.STRING}
+                    label={param.name}
+                    propKey={param.name}
+                    value={param.default}
+                    setter={updateParameter}
+                    rightActionButton={<IconButton
+                      aria-label={`Delete ${name} parameter`}
+                      variant='ghost'
+                      icon={<DeleteIcon />}
+                      onClick={() => deleteParameter(param.name)}
+                    />}
+                  />
+                </Box>
+              ))}
+                <Button
+                  leftIcon={<AddIcon />}
+                  variant='outline'
+                  onClick={createParamOnOpen}
+                >
+                  {t('addParam')}
+                </Button>
+            </Box>
+            <Box
+              p='4'
+              borderBottom='1px'
+              borderColor='gray.100'
+            >
+              <Heading as='h4' size='sm'>
+                {t('dashboardWidgets')}
+              </Heading>
+            </Box>
+            <Box p='4'>
+              {widgets.map((w, index) => (
+              <WidgetRefCard
+                  key={w}
+                  id={w}
+                  index={index}
+                  text={w}
+                  moveCard={moveCard}
+                  removeWidget={removeWidget}
+              />
+            ))}
+            </Box>
+            <Box p='4'>
+              <Flex justifyContent='flex-end' alignContent='end' h='full'>
+                <Button variant='ghost' onClick={onClose}>
+                  {tc('close')}
+                </Button>
+                <Button
+                  colorScheme='blue'
+                  mr={3}
+                  onClick={submit}
+                  isDisabled={
+                    nameIsInvalid ||
+                    routeIsInvalid ||
+                    isEmpty(name) ||
+                    isEmpty(route)
+                  }
+                >
+                  {tc('save')}
+                </Button>
+              </Flex>
             </Box>
           </Box>
         </Stack>

@@ -26,6 +26,7 @@ import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 // eslint-disable-next-line import/no-unresolved
 import { useParams } from 'react-router-dom';
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
+import { md5 } from 'ops-frontend/utils/md5';
 
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
@@ -40,12 +41,12 @@ function Dashboard() {
   const dashboardId = useAppSelector(selectDashboardIdFromRoute(route));
   const dashboard = useAppSelector(selectDashboard(dashboardId));
   const dashboardWidgets = useAppSelector(selectDashboardWidgets(dashboardId));
-  const previousDashboardWidgets = usePreviousValue(dashboardWidgets);
+  const previousDashboardWidgets = usePreviousValue<Widget[]>(dashboardWidgets);
   const dependencies = useAppSelector(selectDependencies);
   const consoleWidgets = useAppSelector(selectConsoleWidgets);
-  const previousConsoleWidgets = usePreviousValue(consoleWidgets);
+  const previousConsoleWidgets = usePreviousValue<WidgetMap>(consoleWidgets);
   const hydratedWidgets = useAppSelector(selectHydratedWidgets);
-  const previousHydratedWidgets = usePreviousValue(hydratedWidgets);
+  const previousHydratedWidgets = usePreviousValue<WidgetMap>(hydratedWidgets);
 
   const [renderedWidgets, setRenderedWidgets] = useState<{ [widgetId: string]: JSX.Element }>({});
 
@@ -61,9 +62,22 @@ function Dashboard() {
     return acc;
   }, {});
 
+  const previousWidgetsWereEmpty = !previousDashboardWidgets || isEmpty(Object.keys(previousDashboardWidgets));
+  const currentWidgetsAreNotEmpty = dashboardWidgets && !isEmpty(Object.keys(dashboardWidgets));
+  const initialLoad = previousWidgetsWereEmpty && currentWidgetsAreNotEmpty;
+
+  const widgetDefinitions = Object.values(consoleWidgets).filter(w => dashboard?.widgetIds?.includes(w.id));
+  const widgetsHash = md5(JSON.stringify(widgetDefinitions || []));
+  const previousWidgetHash: string | undefined = usePreviousValue<string>(widgetsHash);
+  const widgetsHaveChanged = widgetsHash?.toString() !== previousWidgetHash?.toString();
+  
+  const parametersHash = md5(JSON.stringify(parameters || []));
+  const previousParameterHash: string | undefined = usePreviousValue<string>(parametersHash);
+  const parametersHaveChanged = parametersHash?.toString() !== previousParameterHash?.toString();
+  
+  const shouldCallFetch = (initialLoad || widgetsHaveChanged || parametersHaveChanged);
   useEffect(() => {
-      if ((!previousDashboardWidgets || isEmpty(Object.keys(previousDashboardWidgets)))
-      && dashboardWidgets && !isEmpty(Object.keys(dashboardWidgets))) {
+    if (shouldCallFetch) {
       void fetchWidgetsForDashboard({
         consoleName,
         dashboardWidgets,
@@ -73,13 +87,26 @@ function Dashboard() {
         parameters
       });
     }
-  
-  });
+  }, [
+    shouldCallFetch,
+    consoleName,
+    dashboardWidgets,
+    consoleWidgets,
+    dispatch,
+    dashboardId,
+    parameters
+  ]
+);
 
   useEffect(() => {
     async function importAndRenderWidgets() {
       try {
-        const deepRenderedWidgets = { ...renderedWidgets };
+        const deepRenderedWidgets = {
+          ...Object.fromEntries(
+            Object.entries(renderedWidgets)
+              .filter(([key]) => dashboard?.widgetIds?.includes(key))
+          )
+        };
         for (let widget of dashboardWidgets) {
           deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(
             widget,
@@ -121,7 +148,10 @@ function Dashboard() {
     previousHydratedWidgets,
     dashboardId,
     parameters,
-    router.isReady
+    router.isReady,
+    dispatch,
+    dashboard?.widgetIds,
+    consoleName
   ]);
 
   function renderDashboard() {
@@ -137,7 +167,7 @@ function Dashboard() {
   function renderDashboardWidgets() {
     return (
       <div>
-        {Object.values(renderedWidgets)}
+        {dashboard?.widgetIds?.map(id => renderedWidgets[id])}
       </div>
     );
   }
@@ -220,11 +250,11 @@ function getWidgetAndChildren(widget: Widget, consoleWidgets: WidgetMap): Widget
   return widgetList;
 }
 
-function usePreviousValue(value: any) {
+function usePreviousValue<T>(value: any): T | undefined {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
-  });
+  }, [value]);
   return ref.current;
 }
 
@@ -232,9 +262,9 @@ async function renderWidgetAndChildren(
   widget: Widget,
   hydratedWidgets: WidgetMap,
   dependencies: FlatMap,
+  dashboardId: string,
   consoleName: string, 
   dispatch: AppDispatch,
-  dashboardId?: string,
   parameters?: Json
 ): Promise<JSX.Element> {
   const { childrenIds } = widget;
@@ -306,9 +336,9 @@ async function renderWidget(
   widget: Widget,
   children: (Widget & { renderedElement: JSX.Element })[],
   dependencies: FlatMap,
+  dashboardId: string,
   consoleName: string, 
   dispatch: AppDispatch,
-  dashboardId?: string,
   parameters?: Json
 ): Promise<JSX.Element> {
   let hydratedWidget;
