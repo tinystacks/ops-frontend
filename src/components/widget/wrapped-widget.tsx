@@ -1,7 +1,9 @@
 import {
-  Heading, Flex, Spacer, Box, IconButton, Menu, MenuButton, MenuList, Center
+  Heading, Flex, Spacer, Box, IconButton, Menu, MenuButton, MenuList, Center, Button, Icon, useDisclosure
 } from '@chakra-ui/react';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { HamburgerIcon } from '@chakra-ui/icons'
+import { TbRefresh } from 'react-icons/tb/index.js';
 import { Widget } from '@tinystacks/ops-model';
 import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
 import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
@@ -9,7 +11,7 @@ import { BaseWidget } from '@tinystacks/ops-core';
 import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
-import { Json } from 'ops-frontend/types';
+import { FlatSchema, Json } from 'ops-frontend/types';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 
@@ -18,6 +20,8 @@ export type WrappedWidgetProps = {
   hydratedWidget: BaseWidget,
   widget: Widget,
   childrenWidgets: (Widget & { renderedElement: JSX.Element })[],
+  onRefresh: () => void | Promise<void>,
+  widgetProperties?: FlatSchema[];
   dashboardId?: string,
   parameters?: Json
 };
@@ -26,11 +30,13 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
   // redux
   const dispatch = useAppDispatch();
   const consoleName = useAppSelector(selectConsoleName);
+  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true }); 
   // props
   const {
     hydratedWidget,
     widget,
     childrenWidgets,
+    widgetProperties,
     dashboardId,
     parameters
   } = props;
@@ -62,13 +68,32 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <></> :
     <Box className='widgetHeader'>
       <Flex>
-        <Center>
-          <Heading as='h4' size='md'>
-            {widget.displayName || widget.id}
+      <IconButton 
+        variant='link'
+        size='md'
+        colorScheme='black'
+        onClick={onToggle}
+        aria-label={isOpen ? 'downCaret' : 'upCaret'} 
+        float='left'
+        icon={isOpen ? <ChevronDownIcon/> : <ChevronUpIcon />} 
+        />  
+        <Center>    
+        <Heading as='h4' size='md'>
+            { widget.displayName || widget.id}
           </Heading>
         </Center>
         <Spacer />
         <Box>
+        <Button 
+          colorScheme="purple"
+          variant="outline"
+          marginRight={'8px'} 
+          size='sm'
+          border='0px'
+          onClick={() => props.onRefresh()}
+        >
+          <Icon as={TbRefresh} />
+        </Button>
           <Menu>
             <MenuButton
               as={IconButton}
@@ -81,6 +106,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
                 key={`${widget.id}-edit`}
                 console={consoleName}
                 widgetId={widget.id}
+                widgetProperties={widgetProperties}
                 dashboardId={dashboardId}
                 parameters={parameters}
               />
@@ -93,7 +119,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
   return (
     <Box data-testid='widget' className='widget' key={widget.id}>
       {heading}
-      <Flex className='widgetBody'>
+      <Flex className='widgetBody' hidden={!isOpen}>
         {hydratedWidget.render(
           childrenWidgets,
           updateOverrides

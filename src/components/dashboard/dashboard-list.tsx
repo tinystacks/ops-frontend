@@ -1,32 +1,68 @@
-import { selectDashboards, updateConsole } from 'ops-frontend/store/consoleSlice';
 import React, { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
-import apis from 'ops-frontend/utils/apis';
-import { Alert, AlertDescription, AlertIcon, AlertTitle, Flex, Heading, Spacer, Wrap } from '@chakra-ui/react';
-import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
-import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
+import { Dashboard } from '@tinystacks/ops-model';
 import { useTranslation } from 'react-i18next';
+import {
+  Button,
+  Flex,
+  Heading,
+  Spacer,
+  Spinner,
+  useDisclosure,
+  Wrap
+} from '@chakra-ui/react';
+import apis from 'ops-frontend/utils/apis';
+import {
+  createNewDashboard,
+  dismissError,
+  selectConsoleName,
+  selectDashboards,
+  selectError,
+  updateConsole
+} from 'ops-frontend/store/consoleSlice';
+import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
+import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
+import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { DashboardCard } from 'ops-frontend/components/dashboard/dashboard-card';
+import CreateDashboardModal from 'ops-frontend/components/dashboard/create-dashboard-modal';
+import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
+import { ShowableError } from 'ops-frontend/types';
 
 export function DashboardList () {
   const { t: hm } = useTranslation('home');
+  const { t: d } = useTranslation('dashboard');
   const dashboards = useAppSelector(selectDashboards);
+  const consoleName = useAppSelector(selectConsoleName);
+  const error = useAppSelector(selectError);
   const dispatch = useAppDispatch();
-  const [consolesError, setConsolesError] = useState<string | undefined>(undefined);
+  const [consolesError, setConsolesError] = useState<ShowableError | undefined>(undefined);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   async function fetchData() {
     try {
+      setIsLoading(true);
       setConsolesError(undefined);
       const consoles = await apis.getConsoles();
       if (Array.isArray(consoles)) {
         // FIXME: we need to eventually only deal with a single console
         dispatch(updateConsole(consoles[0]));
         setRetryCount(0);
+        setIsLoading(false);
       }
     } catch (e: any) {
-      setConsolesError(e.message);
+      const {
+        message,
+        cause,
+        context
+      } = e?.body?.body || {};
+      setConsolesError({
+        title: hm('consolesError'),
+        message,
+        cause,
+        context
+      });
       setRetryCount(retryCount + 1);
+      setIsLoading(false);
     }
   }
 
@@ -36,19 +72,35 @@ export function DashboardList () {
     }
   }, [retryCount, dashboards]);
 
+  const {
+    isOpen: createIsOpen,
+    onOpen: createOnOpen,
+    onClose: createOnClose
+  } = useDisclosure();
+
   function renderHeader() {
     return (
       <Flex>
         <Heading>{hm('dashboards')}</Heading>
         <Spacer />
-        {/* <Button colorScheme='blue'>{hm('addDashboard')}</Button> */}
-        {/* TODO: ACTIONS */}
-        {/* <button> */}
-        {/* {common('settings')} */}
-        {/* </button> */}
+        <Button colorScheme='blue' onClick={createOnOpen}>{d('addDashboard')}</Button>
       </Flex>
     );
   }
+
+  async function createDashboard (dashboard: Dashboard) {
+    createOnClose();
+    dispatch(createNewDashboard(consoleName, dashboard));
+  }
+
+  const createModal = createIsOpen ? (
+    <CreateDashboardModal
+      isOpen={createIsOpen}
+      createDashboard={createDashboard}
+      onClose={createOnClose}
+      dashboards={dashboards}
+    />
+  ) : (<></>);
 
   const cards = Object.values(dashboards).map(dashboard => (
     <Wrap key={dashboard.id}>
@@ -56,31 +108,41 @@ export function DashboardList () {
     </Wrap>
   ));
 
+  let errorBanner = (<></>);
   if (consolesError) {
-    return (
-      <>
-        <HeaderLayout>
-          {renderHeader()}
-        </HeaderLayout>
-        <FullpageLayout>
-          <Alert status='error'>
-            <AlertIcon />
-            <AlertTitle>{hm('consoleError')}</AlertTitle>
-            <AlertDescription>{consolesError}</AlertDescription>
-          </Alert>
-        </FullpageLayout>
-      </>
+    errorBanner = (
+      <DismissableErrorBanner
+        key='consoles-error'
+        error={consolesError}
+        dismissError={() => setConsolesError(undefined)}
+      />
     );
+  } else if (error) {
+    errorBanner = (
+      <DismissableErrorBanner
+        key='consoles-error'
+        error={error}
+        dismissError={() => dispatch(dismissError())}
+      />
+    );
+  }
+
+  let loader = (<></>);
+  if (isLoading) {
+    loader = <Spinner />
   }
 
 
   return (
     <>
+      {createModal}
       <HeaderLayout>
         {renderHeader()}
       </HeaderLayout>
+      {errorBanner}
       <FullpageLayout>
         <Wrap data-testid='console-page-contents' spacing="6" maxWidth="7xl">
+          {loader}
           {cards}
         </Wrap>
       </FullpageLayout>
