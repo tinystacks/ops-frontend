@@ -18,7 +18,7 @@ import { useEffect, useRef } from 'react';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { Parameter, Widget } from '@tinystacks/ops-model';
+import { Parameter, Widget, TinyStacksError as TinyStacksErrorType } from '@tinystacks/ops-model';
 import { TinyStacksError } from '@tinystacks/ops-core';
 import { FlatMap, FlatSchema, Json, WidgetMap } from 'ops-frontend/types';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
@@ -338,7 +338,14 @@ export async function loadWidgetProperties(widgetType: string, dependencies: Fla
   const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
     const moduleName = dependencies[widgetType];
     const moduleNamespace = camelCase(moduleName);
-    //const plugin = (plugins as any)[moduleNamespace] as any;
+    const plugin = (plugins as any)[moduleNamespace] as any;
+    if (!plugin) {
+      throw TinyStacksError.fromJson({
+        message: 'Missing dependency!',
+        status: 424,
+        cause: `Cannot find module ${moduleName} for widget type ${widgetType}`
+      }).toJson();
+    }
     const schemaJson = (plugins as any)[`${moduleNamespace}Schema`];
     const widgetSchema = get(schemaJson, `definitions.${widgetType}`) as JSONSchema7;
     if (widgetSchema) {
@@ -378,6 +385,8 @@ async function renderWidget(
   widget: Widget,
   children: (Widget & { renderedElement: JSX.Element })[],
   dependencies: FlatMap,
+  consoleName: string, 
+  dispatch: AppDispatch,
   dashboardId?: string,
   parameters?: Json
 ): Promise<JSX.Element> {
@@ -388,7 +397,7 @@ async function renderWidget(
       {
         ...widget,
         originalType: widget.type,
-        error: (widget as unknown as TinyStacksError).message || ''
+        error: (widget as unknown as TinyStacksErrorType).message || ''
       }
     )
   } else if (widget.type === 'LoadingWidget') {
