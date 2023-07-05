@@ -254,36 +254,15 @@ function getSchemaProperties (schema: JSONSchema7, requiredProperties: string[])
   );
 }
 
-async function renderWidget(
-  widget: Widget,
-  children: (Widget & { renderedElement: JSX.Element })[],
-  dependencies: FlatMap,
-  dashboardId?: string,
-  parameters?: Json
-): Promise<JSX.Element> {
-  let hydratedWidget;
+export async function loadWidgetProperties(widgetType: string, dependencies: FlatMap) { 
   let widgetProperties: FlatSchema[] | undefined;
-  if (widget.type === 'ErrorWidget') {
-    hydratedWidget = ErrorWidget.fromJson(
-      {
-        ...widget,
-        originalType: widget.type,
-        error: (widget as unknown as TinyStacksError).message || ''
-      }
-    )
-  } else if (widget.type === 'LoadingWidget') {
-    hydratedWidget = LoadingWidget.fromJson({
-      ...widget,
-      // @ts-ignore
-      originalType: widget.originalType
-    });
-  } else { 
-    const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
-    const moduleName = dependencies[widget.type];
+
+  const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
+    const moduleName = dependencies[widgetType];
     const moduleNamespace = camelCase(moduleName);
-    const plugin = (plugins as any)[moduleNamespace] as any;
+    //const plugin = (plugins as any)[moduleNamespace] as any;
     const schemaJson = (plugins as any)[`${moduleNamespace}Schema`];
-    const widgetSchema = get(schemaJson, `definitions.${widget.type}`) as JSONSchema7;
+    const widgetSchema = get(schemaJson, `definitions.${widgetType}`) as JSONSchema7;
     if (widgetSchema) {
       const {
         allOf = [],
@@ -313,6 +292,40 @@ async function renderWidget(
         ...sortBy(optionalProperties, 'name')
       ];
     }
+
+    return widgetProperties;
+}
+
+async function renderWidget(
+  widget: Widget,
+  children: (Widget & { renderedElement: JSX.Element })[],
+  dependencies: FlatMap,
+  dashboardId?: string,
+  parameters?: Json
+): Promise<JSX.Element> {
+  let hydratedWidget;
+  let widgetProperties: FlatSchema[] | undefined;
+  if (widget.type === 'ErrorWidget') {
+    hydratedWidget = ErrorWidget.fromJson(
+      {
+        ...widget,
+        originalType: widget.type,
+        error: (widget as unknown as TinyStacksError).message || ''
+      }
+    )
+  } else if (widget.type === 'LoadingWidget') {
+    hydratedWidget = LoadingWidget.fromJson({
+      ...widget,
+      // @ts-ignore
+      originalType: widget.originalType
+    });
+  } else { 
+
+    widgetProperties = await loadWidgetProperties(widget.type, dependencies);
+    const plugins = await import('ops-frontend/plugins'); // eslint-disable-line import/no-unresolved
+    const moduleName = dependencies[widget.type];
+    const moduleNamespace = camelCase(moduleName);
+    const plugin = (plugins as any)[moduleNamespace] as any;
     hydratedWidget = plugin[widget.type].fromJson(widget);
   }
 

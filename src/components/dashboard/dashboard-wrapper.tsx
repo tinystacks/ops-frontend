@@ -84,6 +84,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
       consoleName={consoleName}
       dashboardId={dashboardId}
       widgetTypes={Object.keys(dependencies)}
+      dependencies={dependencies}
     />
   ) : (<></>);
 

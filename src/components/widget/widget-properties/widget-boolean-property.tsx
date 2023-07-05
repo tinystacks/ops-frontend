@@ -21,7 +21,7 @@ export function WidgetBooleanProperty(props: WidgetPropertyProps) {
         isRequired={isRequired}
       >
         <FormLabel>{name}</FormLabel>
-        <Select size='md' placeholder={value} onChange={(event) => setter(name, event.target.value)}>
+        <Select size='md' placeholder={value || 'Select Option'} onChange={(event) => setter(name, event.target.value)}>
           <option value='true'> True </option>
           <option value='false'> False </option>
         </Select>

@@ -6,7 +6,7 @@ import React from 'react';
 import { WidgetListPropertyProps } from 'ops-frontend/components/widget/widget-properties/widget-property-types';
 
 export function WidgetListProperty(props: WidgetListPropertyProps) {
-  const [listValue, setListValue] = React.useState(props.value);
+  const [listValue, setListValue] = React.useState(props.value || ['']);
 
   const {
     name,
@@ -15,6 +15,8 @@ export function WidgetListProperty(props: WidgetListPropertyProps) {
     isRequired = false,
     isDisabled = false,
   } = props;
+
+  //console.log('valueee: ', value);
 
   const addItem = () => {
     const newValue = [...listValue, ''];
@@ -66,7 +68,7 @@ export function WidgetListProperty(props: WidgetListPropertyProps) {
   const input =
     (
       <>
-        {value.map((item: string, index: number) => listItem(item, index))}
+        {value?.map((item: string, index: number) => listItem(item, index))}
         <MenuButton
           as={IconButton}
           aria-label='Add List Item'

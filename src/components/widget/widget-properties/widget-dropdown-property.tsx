@@ -7,7 +7,7 @@ import { WidgetDropdownPropertyProps } from 'ops-frontend/components/widget/widg
 
 export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
 
-  const [listValue, setListValue] = React.useState(props.value);
+  const [listValue, setListValue] = React.useState(props.value || []);
   const {
     name,
     value,
@@ -16,6 +16,7 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
     isRequired = false,
     isDisabled = false,
   } = props;
+
 
   const addItem = () => {
     const newValue = [...listValue, ''];
@@ -39,16 +40,16 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
 
   }
 
-  const optionItems = options.map(item => {
+  const optionItems = options ? options.map(item => {
     return (
       <option value={item} key={item}> {item} </option>
     )
-  });
+  }): [];
 
   function listItem(item: string, index: number) {
 
     return (
-      <>
+      <Box>
         <Select size='md' onChange={(event) => onValueChange(event, index)} value={item} placeholder='Select option'>
           {optionItems}
         </Select>
@@ -60,14 +61,14 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
           variant='outline'
           onClick={deleteItem(index)}
         />
-      </>
+      </Box>
 
     );
   }
 
   const input = (
-    <>
-      {value.map((item: string, index: number) => listItem(item, index))}
+    <Box>
+      {value ? value.map((item: string, index: number) => listItem(item, index)): []}
       <MenuButton
         as={IconButton}
         aria-label='Add List Item'
@@ -76,7 +77,7 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
         variant='outline'
         onClick={addItem}
       />
-    </>
+    </Box>
 
   )
 

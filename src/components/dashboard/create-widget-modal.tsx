@@ -10,20 +10,21 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay, 
-  SimpleGrid,
-  GridItem,
-  IconButton,
+  ModalOverlay,
   Select
 } from '@chakra-ui/react';
 import isEmpty from 'lodash.isempty';
 import React from 'react';
 import apis from 'ops-frontend/utils/apis';
 import { useState } from 'react';
-import { createWidget, selectDashboardWidgets } from 'ops-frontend/store/consoleSlice';
-import { useAppDispatch } from 'ops-frontend/store/hooks';
-import { useSelector } from 'react-redux';
-import { AddIcon } from '@chakra-ui/icons'
+import { createWidget, selectConsoleWidgets, selectProviders } from 'ops-frontend/store/consoleSlice';
+import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
+import { loadWidgetProperties } from 'ops-frontend/components/dashboard/dashboard';
+import { FlatSchema } from 'ops-frontend/types';
+import { WidgetDropdownProperty } from 'ops-frontend/components/widget/widget-properties/widget-dropdown-property';
+import { WidgetListProperty } from 'ops-frontend/components/widget/widget-properties/widget-list-property';
+import { WidgetBooleanProperty } from 'ops-frontend/components/widget/widget-properties/widget-boolean-property';
+import { WidgetProperty } from 'ops-frontend/components/widget/widget-properties/widget-propety';
 
 type CreateWidgetModalProps = {
   isOpen: boolean;
@@ -31,6 +32,7 @@ type CreateWidgetModalProps = {
   consoleName: string;
   dashboardId: string;
   widgetTypes: string[];
+  dependencies: { [id: string]: string; }//FlatMap
 };
 
 export default function CreateWidgetModal(props: CreateWidgetModalProps) {
@@ -38,89 +40,41 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
     isOpen,
     onClose,
     consoleName,
-    dashboardId, 
-    widgetTypes
+    widgetTypes,
+    dependencies
   } = props;
 
 
   const dispatch = useAppDispatch();
-
-  const [widgetId, setWidgetId] = useState<string>('');
-  const [widgetDisplayName, setWidgetDisplayName] = useState<string>('');
-  const [widgetRegion, setWidgetRegion] = useState<string>(''); 
-  const [widgetProviders, setWidgetProviders] =  useState<string[]>(); 
-  const [widgetChildren, setWidgetChildren] =  useState<string[]>(); 
-  const [widgetType, setWidgetType] =  useState<string>('');
-  const [widgetProperties, setWidgetProperties] = useState<{key: string, value: any}[]>([]);
-  const [widgetIdIsInvalid, setWidgetIdIsInvalid] = useState<boolean>(false);
-  const [widgetIdError, setWidgetError] = useState<string | undefined>(undefined);
+  const [value, setValue] = React.useState('');
+  const [widgetId] = useState<string>('');
+  const [widgetType, setWidgetType] = useState<string>('');
+  const [widgetFields, setWidgetFields] = useState<FlatSchema[]>([]);
+  const [widgetIdIsInvalid] = useState<boolean>(false);
+  const [widgetIdError] = useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>(undefined);
 
 
 
-  const widgets = useSelector(selectDashboardWidgets(dashboardId));
 
-  function updateWidgetId (widgetId: string) {
-    setWidgetId(widgetId);
+  const providers = useAppSelector(selectProviders);
+  const widgets = useAppSelector(selectConsoleWidgets);
 
-    const allowedCharacters = /[^a-zA-Z0-9]+/;
-    const nameIsInvalid = allowedCharacters.test(widgetId);
-    if (nameIsInvalid) {
-      setWidgetIdIsInvalid(nameIsInvalid);
-      const nameCharacterMessage = 'Widget ids must only contain alphanumeric characters';
-      setWidgetError(nameCharacterMessage);
-    } else if (widgets.find(widget => widget.id === widgetId)) {
-      setWidgetIdIsInvalid(true);
-      const uniqueMessage = 'Widget already exists with this id';
-      setWidgetError(uniqueMessage);
-    } else {
-      setWidgetIdIsInvalid(false);
-      setWidgetError(undefined);
+
+  async function updateWidgetType(type: string) {
+    setWidgetType(type);
+
+    const widgetPropertiesToLoad = await loadWidgetProperties(type, dependencies);
+    if (widgetPropertiesToLoad) {
+      setWidgetFields(widgetPropertiesToLoad);
     }
   }
 
-  function updateWidgetRegion(region: string){ 
-    setWidgetRegion(region); 
-  }
-
-
-  const addProperty = () => {
-    const properties = [...widgetProperties];
-    properties.push({key: '', value: ''})
-    setWidgetProperties(properties);
-  }
-
-  const onChangePropertyKey = (index: number) => (event: any) => {
-    const properties = [...widgetProperties];
-    properties[index].key = event.target.value;
-    setWidgetProperties(properties);
-  }
-
-  const onChangePropertyValue = (index: number) => (event: any) => {
-    const properties = [...widgetProperties];
-    properties[index].value = event.target.value;
-    setWidgetProperties(properties);
-  }
-
-  const widgetKeyValues = (item: {key: string, value: string}, index: number) => {
-    return (
-      <>
-      <SimpleGrid columns={2} columnGap={3} rowGap={6} w="full">
-      <GridItem colSpan={1}>
-        <FormControl>
-          <FormLabel>Key</FormLabel>
-          <Input placeholder="key" type="text" value={item.key} onChange={onChangePropertyKey(index)}></Input>
-        </FormControl>
-      </GridItem>
-      <GridItem colSpan={1}>
-        <FormControl>
-          <FormLabel>Value</FormLabel>
-          <Input placeholder="value" type="text" value={item.value} onChange={onChangePropertyValue(index)}></Input>
-        </FormControl>
-      </GridItem>
-    </SimpleGrid>
-      </>
-    );
+  function updateWidgetField(key: string, newValue: any) { 
+      const widgetJson = JSON.parse(value || '');
+      widgetJson[key] = newValue;
+      setValue(JSON.stringify(widgetJson));
+      //console.log('value: ', value);
   }
 
 
@@ -132,20 +86,10 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
   async function onSaveClick() {
     setError(undefined);
     try {
-      const widget = { 
-        id: widgetId,
-        displayName: widgetDisplayName,
-        type: widgetType, 
-        region: widgetRegion, 
-        providerIds: widgetProviders || [], 
-        childrenIds: widgetChildren || []
-      };
 
-      widgetProperties.forEach(item => {
-        widget[item.key as keyof typeof widget] = item.value;
-      });
-      const createdWidget = await apis.createWidget(consoleName, widget);
-      
+     
+      const createdWidget = await apis.createWidget(consoleName, JSON.parse(value));
+
       dispatch(createWidget(createdWidget));
     } catch (e) {
       setError(`Error creating widget: ${e}`);
@@ -153,7 +97,75 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
     onClose();
   }
 
-  const extraProperties = widgetProperties.map((item, index) => widgetKeyValues(item, index));
+  const widgetInputs = [];
+
+  if (widgetFields) {
+     widgetInputs.push(...widgetFields.map((widgetProperty: FlatSchema) => {
+      const {
+        name,
+        isRequired,
+        type
+      } = widgetProperty;
+      let widgetPropertyItem;
+      if (name === 'childrenIds') {
+        widgetPropertyItem = (
+          <WidgetDropdownProperty
+            key={`widget-input-${name}`}
+            options={Object.keys(widgets)}
+            name={name}
+            value={['']}
+            setter={updateWidgetField}
+            isRequired={isRequired}
+          />
+
+
+        );
+      }
+      else if (name === 'providerIds') {
+        widgetPropertyItem = (
+          <WidgetDropdownProperty
+            key={`widget-input-${name}`}
+            options={Object.keys(providers)}
+            name={name}
+            value={['']}
+            setter={updateWidgetField}
+            isRequired={isRequired}
+          />
+        );
+      } else if (type === 'array') {
+        widgetPropertyItem = (
+          <WidgetListProperty
+            key={`widget-input-${name}`}
+            name={name}
+            value={[]}
+            setter={updateWidgetField}
+            isRequired={isRequired}
+          />
+        );
+      } else if (type === 'boolean') {
+        widgetPropertyItem = (
+        <WidgetBooleanProperty
+          key={`widget-input-${name}`}
+          name={name}
+          value={undefined}
+          setter={updateWidgetField}
+          isRequired={isRequired}
+        />
+        );
+      } else { 
+        widgetPropertyItem = (
+          <WidgetProperty
+          key={`widget-input-${name}`}
+          name={name}
+          value={undefined}
+          setter={updateWidgetField}
+          isRequired={isRequired}
+        />
+        );
+      }
+      return widgetPropertyItem;
+    }));
+  }
 
   const typeOptions = widgetTypes.map(item => {
     return (
@@ -169,66 +181,26 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
         <ModalHeader>{'Create Widget'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-        <FormControl
-          isInvalid={!isEmpty(error)}
-          isRequired
-        >
-          <FormLabel>{'Widget Id'}</FormLabel>
-          <Input
-            type='text'
-            value={widgetId}
-            onChange={(event) => updateWidgetId(event.target.value)}
-            isInvalid={widgetIdIsInvalid}
-          />
-          <FormErrorMessage>{widgetIdError}</FormErrorMessage>
-        </FormControl>
-        <FormControl>
-          <FormLabel>{'Widget Display Name'}</FormLabel>
-          <Input
-            type='text'
-            value={widgetDisplayName}
-            onChange={(event) => setWidgetDisplayName(event.target.value)}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel>{'Widget Region'}</FormLabel>
-          <Input
-            type='text'
-            value={widgetRegion}
-            onChange={(event) => updateWidgetRegion(event.target.value)}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel>{'Widget Providers'}</FormLabel>
-          <Input
-            type='text'
-            value={widgetProviders}
-            onChange={(event) => setWidgetProviders([event.target.value])}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel>{'Widget Children'}</FormLabel>
-          <Input
-            type='text'
-            value={widgetChildren}
-            onChange={(event) => setWidgetChildren([event.target.value])}
-          />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel>{'Widget Type'}</FormLabel>
-          <Select size='md' onChange={(event) => setWidgetType(event.target.value)} placeholder='Select option'>
-          {typeOptions}
-          </Select>
-        </FormControl>
-        {extraProperties}
-        <Button
-        as={IconButton}
-        aria-label='Add Widget Property'
-        size='sm'
-        icon={<AddIcon />}
-        variant='outline'
-        onClick={addProperty}
-        />
+          <FormControl isRequired>
+            <FormLabel>{'Widget Type'}</FormLabel>
+            <Select size='md' onChange={async (event) => await updateWidgetType(event.target.value)} placeholder='Select option'>
+              {typeOptions}
+            </Select>
+          </FormControl>
+          <FormControl
+            isInvalid={!isEmpty(error)}
+            isRequired
+          >
+            <FormLabel>{'Widget Id'}</FormLabel>
+            <Input
+              type='text'
+              value={widgetId}
+              onChange={(event) => updateWidgetField('id', event.target.value)}
+              isInvalid={widgetIdIsInvalid}
+            />
+            <FormErrorMessage>{widgetIdError}</FormErrorMessage>
+          </FormControl>
+          {widgetInputs}
         </ModalBody>
         <ModalFooter>
           <Button variant='ghost' onClick={resetAndClose}>
@@ -241,7 +213,6 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
             isDisabled={
               widgetIdIsInvalid ||
               isEmpty(widgetId) ||
-              isEmpty(widgetDisplayName) ||
               isEmpty(widgetType)
             }
           >
