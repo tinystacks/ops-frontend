@@ -46,12 +46,12 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
 
 
   const dispatch = useAppDispatch();
-  const [value, setValue] = React.useState('');
+  const [value, setValue] = React.useState('{}');
   const [widgetId] = useState<string>('');
   const [widgetType, setWidgetType] = useState<string>('');
   const [widgetFields, setWidgetFields] = useState<FlatSchema[]>([]);
-  const [widgetIdIsInvalid] = useState<boolean>(false);
-  const [widgetIdError] = useState<string | undefined>(undefined);
+  const [widgetIdIsInvalid, setWidgetIdIsInvalid] = useState<boolean>(false);
+  const [widgetError, setWidgetError] = useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>(undefined);
 
 
@@ -71,10 +71,29 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
   }
 
   function updateWidgetField(key: string, newValue: any) { 
-      const widgetJson = JSON.parse(value || '');
+      const widgetJson = JSON.parse(value);
       widgetJson[key] = newValue;
       setValue(JSON.stringify(widgetJson));
-      //console.log('value: ', value);
+  }
+
+  function updateWidgetId (widgetId: string) {
+
+    updateWidgetField('id', widgetId);
+
+    const allowedCharacters = /[^a-zA-Z0-9]+/;
+    const nameIsInvalid = allowedCharacters.test(widgetId);
+    if (nameIsInvalid) {
+      setWidgetIdIsInvalid(nameIsInvalid);
+      const nameCharacterMessage = 'Widget ids must only contain alphanumeric characters';
+      setWidgetError(nameCharacterMessage);
+    } else if (Object.keys(widgets).find(widget => widget === widgetId)) {
+      setWidgetIdIsInvalid(true);
+      const uniqueMessage = 'Widget already exists with this id';
+      setWidgetError(uniqueMessage);
+    } else {
+      setWidgetIdIsInvalid(false);
+      setWidgetError(undefined);
+    }
   }
 
 
@@ -98,6 +117,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
   }
 
   const widgetInputs = [];
+  const widgetJson = JSON.parse(value);
 
   if (widgetFields) {
      widgetInputs.push(...widgetFields.map((widgetProperty: FlatSchema) => {
@@ -107,13 +127,14 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
         type
       } = widgetProperty;
       let widgetPropertyItem;
+      const propertyValue = widgetJson[name];
       if (name === 'childrenIds') {
         widgetPropertyItem = (
           <WidgetDropdownProperty
             key={`widget-input-${name}`}
             options={Object.keys(widgets)}
             name={name}
-            value={['']}
+            value={propertyValue}
             setter={updateWidgetField}
             isRequired={isRequired}
           />
@@ -127,7 +148,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
             key={`widget-input-${name}`}
             options={Object.keys(providers)}
             name={name}
-            value={['']}
+            value={propertyValue}
             setter={updateWidgetField}
             isRequired={isRequired}
           />
@@ -137,7 +158,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
           <WidgetListProperty
             key={`widget-input-${name}`}
             name={name}
-            value={[]}
+            value={propertyValue}
             setter={updateWidgetField}
             isRequired={isRequired}
           />
@@ -147,7 +168,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
         <WidgetBooleanProperty
           key={`widget-input-${name}`}
           name={name}
-          value={undefined}
+          value={propertyValue}
           setter={updateWidgetField}
           isRequired={isRequired}
         />
@@ -157,7 +178,7 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
           <WidgetProperty
           key={`widget-input-${name}`}
           name={name}
-          value={undefined}
+          value={propertyValue}
           setter={updateWidgetField}
           isRequired={isRequired}
         />
@@ -195,10 +216,10 @@ export default function CreateWidgetModal(props: CreateWidgetModalProps) {
             <Input
               type='text'
               value={widgetId}
-              onChange={(event) => updateWidgetField('id', event.target.value)}
+              onChange={(event) => updateWidgetId(event.target.value)}
               isInvalid={widgetIdIsInvalid}
             />
-            <FormErrorMessage>{widgetIdError}</FormErrorMessage>
+            <FormErrorMessage>{widgetError}</FormErrorMessage>
           </FormControl>
           {widgetInputs}
         </ModalBody>

@@ -10,7 +10,7 @@ import { useRouter } from 'next/router'
 import { DashboardWrapper } from 'ops-frontend/components/dashboard/dashboard-wrapper';
 import {
   selectConsoleName, selectConsoleWidgets, selectDependencies, selectHydratedWidgets, selectDashboard,
-  selectDashboardIdFromRoute, selectDashboardWidgets, updateHydratedWidget
+  selectDashboardIdFromRoute, selectDashboardWidgets, updateHydratedWidget, handleError
 } from 'ops-frontend/store/consoleSlice';
 import { useAppSelector } from 'ops-frontend/store/hooks';
 import { useTranslation } from 'react-i18next';
@@ -18,13 +18,16 @@ import { useEffect, useRef } from 'react';
 import { useAppDispatch } from 'ops-frontend/store/hooks';
 import { AppDispatch } from 'ops-frontend/store/store';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
-import { Parameter, Widget, TinyStacksError } from '@tinystacks/ops-model';
+import { Parameter, Widget } from '@tinystacks/ops-model';
+import { TinyStacksError } from '@tinystacks/ops-core';
 import { FlatMap, FlatSchema, Json, WidgetMap } from 'ops-frontend/types';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 // eslint-disable-next-line import/no-unresolved
 import { useParams } from 'react-router-dom';
 import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
+import { md5 } from 'ops-frontend/utils/md5';
+
 // A dashboard consists of
 // 1. A dashboard-level header with the dashboard title and actions
 // 2. A rendered-out list of widgets
@@ -38,12 +41,12 @@ function Dashboard() {
   const dashboardId = useAppSelector(selectDashboardIdFromRoute(route));
   const dashboard = useAppSelector(selectDashboard(dashboardId));
   const dashboardWidgets = useAppSelector(selectDashboardWidgets(dashboardId));
-  const previousDashboardWidgets = usePreviousValue(dashboardWidgets);
+  const previousDashboardWidgets = usePreviousValue<Widget[]>(dashboardWidgets);
   const dependencies = useAppSelector(selectDependencies);
   const consoleWidgets = useAppSelector(selectConsoleWidgets);
-  const previousConsoleWidgets = usePreviousValue(consoleWidgets);
+  const previousConsoleWidgets = usePreviousValue<WidgetMap>(consoleWidgets);
   const hydratedWidgets = useAppSelector(selectHydratedWidgets);
-  const previousHydratedWidgets = usePreviousValue(hydratedWidgets);
+  const previousHydratedWidgets = usePreviousValue<WidgetMap>(hydratedWidgets);
 
   const [renderedWidgets, setRenderedWidgets] = useState<{ [widgetId: string]: JSX.Element }>({});
 
@@ -59,9 +62,22 @@ function Dashboard() {
     return acc;
   }, {});
 
+  const previousWidgetsWereEmpty = !previousDashboardWidgets || isEmpty(Object.keys(previousDashboardWidgets));
+  const currentWidgetsAreNotEmpty = dashboardWidgets && !isEmpty(Object.keys(dashboardWidgets));
+  const initialLoad = previousWidgetsWereEmpty && currentWidgetsAreNotEmpty;
+
+  const widgetDefinitions = Object.values(consoleWidgets).filter(w => dashboard?.widgetIds?.includes(w.id));
+  const widgetsHash = md5(JSON.stringify(widgetDefinitions || []));
+  const previousWidgetHash: string | undefined = usePreviousValue<string>(widgetsHash);
+  const widgetsHaveChanged = widgetsHash?.toString() !== previousWidgetHash?.toString();
+  
+  const parametersHash = md5(JSON.stringify(parameters || []));
+  const previousParameterHash: string | undefined = usePreviousValue<string>(parametersHash);
+  const parametersHaveChanged = parametersHash?.toString() !== previousParameterHash?.toString();
+  
+  const shouldCallFetch = (initialLoad || widgetsHaveChanged || parametersHaveChanged);
   useEffect(() => {
-    if ((!previousDashboardWidgets || isEmpty(Object.keys(previousDashboardWidgets)))
-      && dashboardWidgets && !isEmpty(Object.keys(dashboardWidgets))) {
+    if (shouldCallFetch) {
       void fetchWidgetsForDashboard({
         consoleName,
         dashboardWidgets,
@@ -71,22 +87,45 @@ function Dashboard() {
         parameters
       });
     }
-  });
+  }, [
+    shouldCallFetch,
+    consoleName,
+    dashboardWidgets,
+    consoleWidgets,
+    dispatch,
+    dashboardId,
+    parameters
+  ]
+);
 
   useEffect(() => {
     async function importAndRenderWidgets() {
-      const deepRenderedWidgets = { ...renderedWidgets };
-      for (let widget of dashboardWidgets) {
-        deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(
-          widget,
-          hydratedWidgets,
-          dependencies,
-          dashboardId,
-          parameters
-        );
+      try {
+        const deepRenderedWidgets = {
+          ...Object.fromEntries(
+            Object.entries(renderedWidgets)
+              .filter(([key]) => dashboard?.widgetIds?.includes(key))
+          )
+        };
+        for (let widget of dashboardWidgets) {
+          deepRenderedWidgets[widget.id || ''] = await renderWidgetAndChildren(
+            widget,
+            hydratedWidgets,
+            dependencies,
+            consoleName, 
+            dispatch,
+            dashboardId,
+            parameters
+          );
+        }
+  
+        setRenderedWidgets(deepRenderedWidgets);
+      } catch (error: any) {
+        dispatch(handleError({
+          title: 'Could not render widgets!',
+          error: error?.body || error
+        }));
       }
-
-      setRenderedWidgets(deepRenderedWidgets);
     }
 
     // TODO: deep compare widget trees that are rendered on this dashboard instead
@@ -109,7 +148,10 @@ function Dashboard() {
     previousHydratedWidgets,
     dashboardId,
     parameters,
-    router.isReady
+    router.isReady,
+    dispatch,
+    dashboard?.widgetIds,
+    consoleName
   ]);
 
   function renderDashboard() {
@@ -125,7 +167,7 @@ function Dashboard() {
   function renderDashboardWidgets() {
     return (
       <div>
-          {Object.values(renderedWidgets)}
+        {dashboard?.widgetIds?.map(id => renderedWidgets[id])}
       </div>
     );
   }
@@ -134,6 +176,7 @@ function Dashboard() {
     <DashboardWrapper
       dashboardContents={renderDashboard()}
       dashboardId={dashboardId}
+      description={dashboard?.description}
     />
   )
 }
@@ -167,7 +210,7 @@ export async function fetchWidgetsForDashboard(args: {
   for (const widget of widgetsFetchList) {
     // TODO: dispatch a loading widget
     dispatch(updateHydratedWidget(new LoadingWidget({ ...widget, originalType: widget.type }).toJson()));
-    void apis.getWidget({
+    await apis.getWidget({
       consoleName,
       widget,
       dashboardId,
@@ -207,11 +250,11 @@ function getWidgetAndChildren(widget: Widget, consoleWidgets: WidgetMap): Widget
   return widgetList;
 }
 
-function usePreviousValue(value: any) {
+function usePreviousValue<T>(value: any): T | undefined {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
-  });
+  }, [value]);
   return ref.current;
 }
 
@@ -219,12 +262,14 @@ async function renderWidgetAndChildren(
   widget: Widget,
   hydratedWidgets: WidgetMap,
   dependencies: FlatMap,
-  dashboardId?: string,
+  dashboardId: string,
+  consoleName: string, 
+  dispatch: AppDispatch,
   parameters?: Json
 ): Promise<JSX.Element> {
   const { childrenIds } = widget;
   if (!childrenIds || isEmpty(childrenIds)) {
-    return await renderWidget(widget, [], dependencies, dashboardId, parameters);
+    return await renderWidget(widget, [], dependencies, consoleName, dispatch, dashboardId, parameters);
   }
 
   // TODO: Throw if missing
@@ -234,12 +279,45 @@ async function renderWidgetAndChildren(
   for (const child of children) {
     renderedChildren.push({
       ...widget,
-      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets, dependencies, dashboardId, parameters)
+      renderedElement: await renderWidgetAndChildren(child, hydratedWidgets, dependencies, 
+        consoleName, dispatch, dashboardId, parameters)
     });
   }
 
-  return await renderWidget(widget, renderedChildren, dependencies, dashboardId, parameters);
+  return await renderWidget(widget, renderedChildren, dependencies, consoleName, dispatch, dashboardId, parameters);
 }
+
+async function getWidgetOnRefresh(args: {
+  consoleName: string;
+  widget: Widget;
+  dispatch: AppDispatch;
+  dashboardId?: string;
+  parameters?: Json
+}) {
+  const {
+    consoleName,
+    widget,
+    dispatch,
+    dashboardId,
+    parameters
+  } = args;
+  
+  dispatch(updateHydratedWidget(new LoadingWidget({ ...widget, originalType: widget.type }).toJson()));
+
+  await apis.getWidget({
+    consoleName,
+    widget,
+    dashboardId,
+    parameters
+  }).then(renderWidget => dispatch(updateHydratedWidget(renderWidget)))
+    .catch((e: any) => dispatch(updateHydratedWidget(new ErrorWidget({
+      ...widget,
+      originalType: widget.type,
+      error: e.message
+    }).toJson())));
+
+}
+
 
 function getSchemaProperties (schema: JSONSchema7, requiredProperties: string[]): FlatSchema[] {
   return Object.entries(schema.properties || {}).map(
@@ -328,7 +406,6 @@ async function renderWidget(
     const plugin = (plugins as any)[moduleNamespace] as any;
     hydratedWidget = plugin[widget.type].fromJson(widget);
   }
-
   return <WrappedWidget
     key={widget.id}
     // @ts-ignore
@@ -338,6 +415,15 @@ async function renderWidget(
     widgetProperties={widgetProperties}
     dashboardId={dashboardId}
     parameters={parameters}
+    onRefresh={async () => 
+      {
+      await  getWidgetOnRefresh({
+      consoleName, 
+      dispatch,
+      widget,
+      dashboardId, 
+      parameters
+    })}}
   />;
 }
 

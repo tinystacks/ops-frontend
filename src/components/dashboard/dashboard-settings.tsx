@@ -6,14 +6,20 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  IconButton,
   Input,
   Stack,
+  useDisclosure,
 } from '@chakra-ui/react';
+import update from 'immutability-helper'
 import { Dashboard, Parameter } from '@tinystacks/ops-model';
 import isEmpty from 'lodash.isempty';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ParameterInput from 'ops-frontend/components/dashboard/parameter-input';
+import { AddIcon, DeleteIcon } from '@chakra-ui/icons';
+import CreateParameterModal from 'ops-frontend/components/dashboard/create-parameter-modal';
+import { WidgetRefCard } from 'ops-frontend/components/dashboard/widget-ref-card';
 
 type ValidatedInputProps = {
   label: string;
@@ -83,6 +89,14 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
   
   const [parameters, setParameters] = useState<Parameter[]>(dashboard.parameters || []);
   
+  const [widgets, setWidgets] = useState<string[]>(dashboard.widgetIds || []);
+
+  const {
+    isOpen: createParamIsOpen,
+    onOpen: createParamOnOpen,
+    onClose: createParamOnClose
+  } = useDisclosure();
+  
   const otherDashboards: Record<string, Dashboard> = Object.fromEntries(
     Object.entries(allDashboards)
       .filter(([id]) => id !== dashboard.id)
@@ -93,7 +107,8 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
       ...dashboard,
       route,
       description,
-      parameters
+      parameters,
+      widgetIds: widgets
     }
     updateDashboard(updatedDashboard);
   }
@@ -149,50 +164,84 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
     }
   }
 
+  function createParameter (param: Parameter) {
+    createParamOnClose();
+    const newParams = [...parameters, param];
+    setParameters(newParams);
+  }
+
+  function deleteParameter (name: string) {
+    const params = parameters.filter(p => p.name !== name);
+    setParameters(params);
+  }
+
+  function removeWidget (id: string) {
+    const updatedWidgets = widgets.filter(w => w !== id);
+    setWidgets(updatedWidgets);
+  }
+
+  const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
+    setWidgets((prevCards: string[]) =>
+      update(prevCards, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevCards[dragIndex]],
+        ],
+      }),
+    )
+  }, [])
+
   return (
-    <Stack flex="1" direction={{ base: 'column' }} align="center" bgColor='gray.100'>
-      <Stack
-        flex="1"
-        align="center"
-        py="4"
-        px={{ base: '4', lg: '8' }}
-        w="full"
-        spacing={3}
-      >
-        <Box
-          className='widget'
+    <>
+      <CreateParameterModal
+        createParameter={createParameter}
+        isOpen={createParamIsOpen}
+        onClose={createParamOnClose}
+        parameters={parameters}
+      />
+      <Stack flex="1" direction={{ base: 'column' }} align="center" bgColor='gray.100'>
+        <Stack
+          flex="1"
+          align="center"
+          py="4"
+          px={{ base: '4', lg: '8' }}
           w="full"
-          minW="lg"
+          spacing={3}
         >
           <Box
-            className='widgetHeader'
-            p='4'
+            className='widget'
+            w="full"
+            minW="lg"
           >
-            <Heading as='h4' size='md'>
-              {t('dashboardSettings')}
-            </Heading>
-          </Box>
-          <Box p='4'>
-            <ValidatedInput
-              label={t('dashboardName')}
-              value={name}
-              onChange={updateName}
-              invalid={nameIsInvalid}
-              error={nameError}
-              disabled
-            />
-            <ValidatedInput
-              label={t('dashboardRoute')}
-              value={route}
-              onChange={updateRoute}
-              invalid={routeIsInvalid}
-              error={routeError}
-            />
-            <ValidatedInput
-              label={t('dashboardDescription')}
-              value={description}
-              onChange={setDescription}
-            />
+            <Box
+              className='widgetHeader'
+              p='4'
+            >
+              <Heading as='h4' size='md'>
+                {t('dashboardSettings')}
+              </Heading>
+            </Box>
+            <Box p='4'>
+              <ValidatedInput
+                label={t('dashboardName')}
+                value={name}
+                onChange={updateName}
+                invalid={nameIsInvalid}
+                error={nameError}
+                disabled
+              />
+              <ValidatedInput
+                label={t('dashboardRoute')}
+                value={route}
+                onChange={updateRoute}
+                invalid={routeIsInvalid}
+                error={routeError}
+              />
+              <ValidatedInput
+                label={t('dashboardDescription')}
+                value={description}
+                onChange={setDescription}
+              />
             </Box>
             <Box
               p='4'
@@ -205,16 +254,59 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
             </Box>
             <Box p='4'>
               {parameters.map(param => (
-                <ParameterInput
-                  key={`${name}-param-${param.name}`}
-                  inputType={param.type || Parameter.type.STRING}
-                  label={param.name}
-                  propKey={param.name}
-                  value={param.default}
-                  setter={updateParameter}
-                />
+                <Box
+                  p='2'
+                  maxW='full'
+                  minW='md'
+                  key={`${name}-param-${param.name}-box`}
+                >
+                  <ParameterInput
+                    key={`${name}-param-${param.name}`}
+                    inputType={param.type || Parameter.type.STRING}
+                    label={param.name}
+                    propKey={param.name}
+                    value={param.default}
+                    setter={updateParameter}
+                    rightActionButton={<IconButton
+                      aria-label={`Delete ${name} parameter`}
+                      variant='ghost'
+                      icon={<DeleteIcon />}
+                      onClick={() => deleteParameter(param.name)}
+                    />}
+                  />
+                </Box>
               ))}
-              <Flex justifyContent='flex-end' alignContent='end' h='full' paddingTop='5'>
+                <Button
+                  leftIcon={<AddIcon />}
+                  variant='outline'
+                  onClick={createParamOnOpen}
+                >
+                  {t('addParam')}
+                </Button>
+            </Box>
+            <Box
+              p='4'
+              borderBottom='1px'
+              borderColor='gray.100'
+            >
+              <Heading as='h4' size='sm'>
+                {t('dashboardWidgets')}
+              </Heading>
+            </Box>
+            <Box p='4'>
+              {widgets.map((w, index) => (
+              <WidgetRefCard
+                  key={w}
+                  id={w}
+                  index={index}
+                  text={w}
+                  moveCard={moveCard}
+                  removeWidget={removeWidget}
+              />
+            ))}
+            </Box>
+            <Box p='4'>
+              <Flex justifyContent='flex-end' alignContent='end' h='full'>
                 <Button variant='ghost' onClick={onClose}>
                   {tc('close')}
                 </Button>
@@ -232,9 +324,10 @@ export default function DashboardSettings(props: DashboardSettingsProps) {
                   {tc('save')}
                 </Button>
               </Flex>
+            </Box>
           </Box>
-        </Box>
+        </Stack>
       </Stack>
-    </Stack>
+    </>
   );
 };

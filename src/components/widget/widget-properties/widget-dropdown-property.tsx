@@ -1,5 +1,5 @@
 import {
-  Box, FormControl, FormLabel, IconButton, MenuButton, Select
+  Box, FormControl, FormLabel, IconButton, Button, Select
 } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import React from 'react';
@@ -40,20 +40,20 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
 
   }
 
-  const optionItems = options ? options.map(item => {
+  const optionItems = options.map(item => {
     return (
       <option value={item} key={item}> {item} </option>
     )
-  }): [];
+  });
 
   function listItem(item: string, index: number) {
 
     return (
-      <Box>
+      <>
         <Select size='md' onChange={(event) => onValueChange(event, index)} value={item} placeholder='Select option'>
           {optionItems}
         </Select>
-        <MenuButton
+        <Button
           as={IconButton}
           aria-label='Delete List Item'
           size='sm'
@@ -61,15 +61,15 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
           variant='outline'
           onClick={deleteItem(index)}
         />
-      </Box>
+      </>
 
     );
   }
 
   const input = (
-    <Box>
-      {value ? value.map((item: string, index: number) => listItem(item, index)): []}
-      <MenuButton
+    <>
+      {value?.map((item: string, index: number) => listItem(item, index))}
+      <Button
         as={IconButton}
         aria-label='Add List Item'
         size='sm'
@@ -77,7 +77,7 @@ export function WidgetDropdownProperty(props: WidgetDropdownPropertyProps) {
         variant='outline'
         onClick={addItem}
       />
-    </Box>
+    </>
 
   )
 

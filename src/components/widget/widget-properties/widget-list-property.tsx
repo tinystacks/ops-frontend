@@ -1,5 +1,5 @@
 import {
-  Box, FormControl, FormLabel, IconButton, MenuButton, Input
+  Box, FormControl, FormLabel, IconButton, Button, Input
 } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import React from 'react';
@@ -15,8 +15,6 @@ export function WidgetListProperty(props: WidgetListPropertyProps) {
     isRequired = false,
     isDisabled = false,
   } = props;
-
-  //console.log('valueee: ', value);
 
   const addItem = () => {
     const newValue = [...listValue, ''];
@@ -52,7 +50,7 @@ export function WidgetListProperty(props: WidgetListPropertyProps) {
           onChange={(event) => onValueChange(event, index)}
           data-form-type='other'
         />
-        <MenuButton
+        <Button
           as={IconButton}
           aria-label='Delete List Item'
           size='sm'
@@ -69,7 +67,7 @@ export function WidgetListProperty(props: WidgetListPropertyProps) {
     (
       <>
         {value?.map((item: string, index: number) => listItem(item, index))}
-        <MenuButton
+        <Button
           as={IconButton}
           aria-label='Add List Item'
           size='sm'

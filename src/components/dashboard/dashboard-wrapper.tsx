@@ -1,29 +1,37 @@
-import { selectConsoleName, selectDashboards, selectDependencies, 
+import { dismissError, handleError, selectError, selectConsoleName, selectDashboards, selectDependencies, 
   updateConsole, updateDashboard } from 'ops-frontend/store/consoleSlice';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
 import { Button, Flex, Heading, Stack, useDisclosure, ButtonGroup, IconButton,
-  Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
+  Menu, MenuButton, MenuList, MenuItem, Box, Text } from '@chakra-ui/react';
 import { HeaderLayout } from 'ops-frontend/components/layout/header-layout';
 import isEmpty from 'lodash.isempty';
 import { FullpageLayout } from 'ops-frontend/components/layout/fullpage-layout';
 import { SettingsIcon, AddIcon } from '@chakra-ui/icons';
 import { useTranslation } from 'react-i18next';
 import DashboardSettings from 'ops-frontend/components/dashboard/dashboard-settings';
-import { Dashboard } from '@tinystacks/ops-model';
+import { ApiError, Dashboard } from '@tinystacks/ops-model';
 import { useNavigate } from 'react-router-dom';
 import CreateWidgetModal from 'ops-frontend/components/dashboard/create-widget-modal';
 import AddExistingWidgetModal from 'ops-frontend/components/dashboard/add-existing-widget-modal';
+import DismissableErrorBanner from 'ops-frontend/components/common/dismissable-error-banner';
 
-export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboardId: string }) {
-  const { dashboardContents, dashboardId } = props;
+export type DashboardWrapperProps = {
+  dashboardId: string;
+  description?: string;
+  dashboardContents: ReactNode;
+}
+
+export function DashboardWrapper(props: DashboardWrapperProps) {
+  const { dashboardContents, dashboardId, description } = props;
   const navigate = useNavigate();
   const dashboards = useAppSelector(selectDashboards);
   const consoleName = useAppSelector(selectConsoleName);
   const dependencies = useAppSelector(selectDependencies);
   const [retryCount, setRetryCount] = useState<number>(0);
   const { t } = useTranslation('dashboard');
+  const error = useAppSelector(selectError);
 
   const dispatch = useAppDispatch();
 
@@ -56,6 +64,13 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
       }
     } catch (e) {
       setRetryCount(retryCount + 1);
+      if (retryCount >= 2) {
+        const error = (e as any).body as ApiError;
+        dispatch(handleError({
+          title: 'Failed to fetch console!',
+          error: error?.body || error
+        }));
+      }
     }
   }
 
@@ -100,7 +115,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
 
   function renderHeader() {
     return (
-      <>
+      <Box>
       <Flex justify='space-between'>
         <Heading>{dashboardId}</Heading>
         <ButtonGroup size='md' isAttached variant='outline'>
@@ -117,13 +132,14 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
           <MenuButton as={IconButton} aria-label='Create or Add Widget' 
           icon={<AddIcon />} variant='outline' colorScheme='gray' />
           <MenuList>
-            <MenuItem onClick={createOnOpen} >Create</MenuItem>
-            <MenuItem onClick={addExistingOnOpen}>Add Existing</MenuItem>
+            <MenuItem onClick={createOnOpen} >Create Widget</MenuItem>
+            <MenuItem onClick={addExistingOnOpen}>Add Existing Widget</MenuItem>
           </MenuList>
         </Menu>
         </ButtonGroup>
       </Flex>
-      </>
+      <Text fontSize='large'>{description}</Text>
+      </Box>
     );
   }
 
@@ -139,6 +155,17 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
     )
   }
 
+  let errorBanner = (<></>);
+  if (error) {
+    errorBanner = (
+      <DismissableErrorBanner
+        key='dashboard-wrapper-error'
+        error={error}
+        dismissError={() => dispatch(dismissError())}
+      />
+    );
+  }
+
   return (
     <>
       {createWidgetModal}
@@ -146,6 +173,7 @@ export function DashboardWrapper(props: { dashboardContents: ReactNode, dashboar
       <HeaderLayout>
         {renderHeader()}
       </HeaderLayout>
+      {errorBanner}
       <FullpageLayout>
         <Stack data-testid='console-page-contents'>
           {content}

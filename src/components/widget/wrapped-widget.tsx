@@ -1,32 +1,33 @@
 import {
-  Heading, Flex, Spacer, Box, IconButton, Menu, MenuButton, MenuList, Center
+  Heading, Flex, Spacer, Box, IconButton, Menu, MenuButton, MenuList, Center, Button, Icon, useDisclosure
 } from '@chakra-ui/react';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { HamburgerIcon } from '@chakra-ui/icons'
+import { TbRefresh } from 'react-icons/tb';
 import { Widget } from '@tinystacks/ops-model';
 import EditWidgetModal from 'ops-frontend/components/widget/edit-widget-modal';
 import DeleteWidgetModal from 'ops-frontend/components/widget/delete-widget-modal';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { selectConsoleName, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
+import { selectConsoleName, selectDashboard, updateHydratedWidget } from 'ops-frontend/store/consoleSlice';
 import { useAppDispatch, useAppSelector } from 'ops-frontend/store/hooks';
 import apis from 'ops-frontend/utils/apis';
 import { FlatSchema, Json } from 'ops-frontend/types';
 import LoadingWidget from 'ops-frontend/widgets/loading-widget';
 import ErrorWidget from 'ops-frontend/widgets/error-widget';
+import RemoveWidgetOption from 'ops-frontend/components/widget/remove-widget-option';
 
 
 export type WrappedWidgetProps = {
-  hydratedWidget: BaseWidget;
-  widget: Widget;
-  childrenWidgets: (Widget & { renderedElement: JSX.Element })[];
+  hydratedWidget: BaseWidget,
+  widget: Widget,
+  childrenWidgets: (Widget & { renderedElement: JSX.Element })[],
+  onRefresh: () => void | Promise<void>,
   widgetProperties?: FlatSchema[];
-  dashboardId?: string;
-  parameters?: Json;
+  dashboardId: string,
+  parameters?: Json
 };
 
 export default function WrappedWidget(props: WrappedWidgetProps) {
-  // redux
-  const dispatch = useAppDispatch();
-  const consoleName = useAppSelector(selectConsoleName);
   // props
   const {
     hydratedWidget,
@@ -36,6 +37,12 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     dashboardId,
     parameters
   } = props;
+  // redux
+  const dispatch = useAppDispatch();
+  const consoleName = useAppSelector(selectConsoleName);
+  const dashboard = useAppSelector(selectDashboard(dashboardId));
+
+  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
 
   function updateOverrides (overrides: any) {
     dispatch(updateHydratedWidget(new LoadingWidget({ 
@@ -64,13 +71,32 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
     <></> :
     <Box className='widgetHeader'>
       <Flex>
-           <Center>
-          <Heading as='h4' size='md'>
-            {widget.displayName || widget.id}
+      <IconButton 
+        variant='link'
+        size='md'
+        colorScheme='black'
+        onClick={onToggle}
+        aria-label={isOpen ? 'downCaret' : 'upCaret'} 
+        float='left'
+        icon={isOpen ? <ChevronDownIcon/> : <ChevronUpIcon />} 
+        />  
+        <Center>    
+        <Heading as='h4' size='md'>
+            { widget.displayName || widget.id}
           </Heading>
         </Center>
         <Spacer />
         <Box>
+        <Button 
+          colorScheme="purple"
+          variant="outline"
+          marginRight={'8px'} 
+          size='sm'
+          border='0px'
+          onClick={() => props.onRefresh()}
+        >
+          <Icon as={TbRefresh} />
+        </Button>
           <Menu>
             <MenuButton
               as={IconButton}
@@ -81,13 +107,18 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
             <MenuList className='dropdown'>
               <EditWidgetModal
                 key={`${widget.id}-edit`}
-                Console={consoleName}
+                console={consoleName}
                 widgetId={widget.id}
                 widgetProperties={widgetProperties}
                 dashboardId={dashboardId}
                 parameters={parameters}
               />
-              <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget}/>
+              <DeleteWidgetModal key={`${widget.id}-delete`} console={consoleName} widget={widget} />
+              <RemoveWidgetOption
+                consoleName={consoleName}
+                dashboard={dashboard}
+                widgetId={widget.id}
+              />
             </MenuList>
           </Menu>
         </Box>
@@ -96,7 +127,7 @@ export default function WrappedWidget(props: WrappedWidgetProps) {
   return (
     <Box data-testid='widget' className='widget' key={widget.id}>
       {heading}
-      <Flex className='widgetBody'>
+      <Flex className='widgetBody' hidden={!isOpen}>
         {hydratedWidget.render(
           childrenWidgets,
           updateOverrides
